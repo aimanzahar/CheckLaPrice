@@ -16,3 +16,5 @@ start "Expo" cmd /k "cd /d \"%~dp0\" && npm run start"
 echo All commands started in separate windows.
 endlocal
 
+
+
