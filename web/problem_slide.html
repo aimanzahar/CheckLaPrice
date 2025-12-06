@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckLaPrice - Problem Detailed (Light)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8fafc; /* Slate 50 */
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #0f172a; /* Slate 900 */
+        }
+
+        /* Background Tech Grid - Light Mode */
+        .bg-tech {
+            background-image: 
+                linear-gradient(#cbd5e1 1px, transparent 1px),
+                linear-gradient(90deg, #cbd5e1 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* Typography */
+        .h-title {
+            font-family: 'Inter Tight', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .h-subtitle {
+            font-size: 1.25rem;
+            color: #64748b; /* Slate 500 */
+            font-weight: 400;
+        }
+
+        /* BENTO GRID BOXES - Light Mode */
+        .bento-box {
+            background: #ffffff;
+            border: 1px solid #e2e8f0; /* Slate 200 */
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+        }
+        
+        .bento-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border-color: #cbd5e1;
+        }
+
+        /* Specific Highlights */
+        .highlight-mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+
+        /* Icons */
+        .icon-circle {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="slide-container" class="relative w-full max-w-[1400px] aspect-video bg-[#f8fafc] flex flex-col p-16 overflow-hidden shadow-2xl border border-slate-200">
+
+        <div class="absolute inset-0 bg-tech opacity-40 pointer-events-none"></div>
+        <div class="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-blue-200 rounded-full blur-[120px] pointer-events-none opacity-50"></div>
+        <div class="absolute bottom-[-10%] right-[20%] w-[500px] h-[500px] bg-red-200 rounded-full blur-[120px] pointer-events-none opacity-50"></div>
+
+        <div class="mb-10 z-10">
+            <div class="flex items-center gap-3 mb-4">
+                <span class="px-3 py-1 bg-red-100 border border-red-200 text-red-600 text-xs font-bold uppercase tracking-widest rounded">Problem Context</span>
+                <span class="text-slate-400 text-xs uppercase tracking-widest font-mono">// Market Analysis</span>
+            </div>
+            <h1 class="h-title mb-4 text-slate-900">
+                The Battle is <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-orange-600">Asymmetric.</span>
+            </h1>
+            <p class="h-subtitle max-w-3xl">
+                E-commerce platforms use dynamic pricing engines and AI to maximize margins. 
+                <span class="text-slate-800 font-bold">Malaysian shoppers are fighting back with static, passive wishlists.</span>
+            </p>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6 h-full z-10 pb-4">
+
+            <div class="bento-box group border-l-4 border-l-red-500">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div class="icon-circle bg-red-50 text-red-600 border border-red-100">
+                            <i class="fa-solid fa-tag"></i>
+                        </div>
+                        <span class="highlight-mono text-red-500">Threat #1</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Unpredictable Price Fluctuations</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Sellers on platforms like Shopee and Lazada often <span class="font-bold text-slate-900">raise prices 20–30%</span> exactly 14 days before mega-sales, making it hard for users to know the best time to buy.
+                    </p>
+                </div>
+                
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-xs text-slate-500 font-mono">
+                        <span>User Impact</span>
+                        <span class="text-slate-900 font-bold">Fake Discounts</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-box border-l-4 border-l-blue-500">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div class="icon-circle bg-blue-50 text-blue-600 border border-blue-100">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <span class="highlight-mono text-blue-500">Threat #2</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Delayed Currency Adjustments</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Imported product prices fluctuate with USD changes, but local prices reflect these changes <span class="font-bold text-slate-900">only after 48 hours</span>, causing uncertainty in purchasing decisions.
+                    </p>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <div class="flex justify-between items-center text-xs text-slate-500 font-mono">
+                        <span>User Impact</span>
+                        <span class="text-slate-900 font-bold">Missed Buy Window</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-box border-l-4 border-l-slate-500">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div class="icon-circle bg-slate-100 text-slate-600 border border-slate-200">
+                            <i class="fa-solid fa-mobile-screen-button"></i>
+                        </div>
+                        <span class="highlight-mono text-slate-500">Root Cause</span>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-900 mb-2">Passive Wishlist Limitations</h3>
+                    <p class="text-slate-600 text-sm leading-relaxed">
+                        Current wishlists act as <span class="font-bold text-slate-900">“dumb containers”</span> that do not track price history, analyze trends, or predict future price changes, leaving users without insights.
+                    </p>
+                </div>
+
+                <div class="mt-4 bg-slate-50 border border-slate-100 rounded p-3 text-xs">
+                    <div class="flex justify-between mb-2 pb-2 border-b border-slate-200">
+                        <span class="text-slate-500">Seller Tool</span>
+                        <span class="text-green-600 font-bold">AI Pricing Engine</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-500">Buyer Tool</span>
+                        <span class="text-red-500 font-bold">Passive Wishlist</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-6 flex justify-between items-center border-t border-slate-200 pt-4">
+            <div class="text-[10px] text-slate-400 font-mono uppercase tracking-wide">
+                <i class="fa-solid fa-database mr-2"></i> Data Sources: Malaysia E-Commerce Confidence Index 2024 • BNM FX Rates
+            </div>
+            <div class="flex gap-4">
+                 <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-red-500 rounded-full"></div>
+                    <span class="text-xs text-slate-500">Market Risk</span>
+                 </div>
+                 <div class="flex items-center gap-2">
+                    <div class="w-2 h-2 bg-blue-500 rounded-full"></div>
+                    <span class="text-xs text-slate-500">Global Factor</span>
+                 </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

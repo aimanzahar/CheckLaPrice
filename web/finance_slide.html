@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckLaPrice - Business Master Slide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #000;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #0f172a;
+        }
+
+        #slide-container {
+            width: 100vw;
+            max-width: 1600px;
+            aspect-ratio: 16/9;
+            background-color: #f8fafc;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 3rem 4rem; /* Tighter padding to maximize space */
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .bg-tech {
+            background-image: 
+                linear-gradient(#e2e8f0 1.5px, transparent 1.5px),
+                linear-gradient(90deg, #e2e8f0 1.5px, transparent 1.5px);
+            background-size: 40px 40px;
+        }
+
+        /* Typography */
+        .h-headline {
+            font-family: 'Inter Tight', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: #0f172a;
+        }
+
+        /* BENTO PANELS */
+        .bento-panel {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 2rem;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Visual Bar Chart */
+        .bar-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            height: 160px;
+            margin-top: auto;
+        }
+        .bar {
+            width: 100%;
+            background: #e2e8f0;
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            transition: height 1s ease;
+        }
+        .bar.active { background: #3b82f6; }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        /* Comparison Table */
+        .comp-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+            align-items: center;
+        }
+        .comp-head { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #94a3b8; padding-bottom: 8px; }
+        .comp-check { color: #10b981; }
+        .comp-x { color: #cbd5e1; }
+
+    </style>
+</head>
+<body>
+
+    <div id="slide-container">
+
+        <div class="absolute inset-0 bg-tech opacity-60 pointer-events-none"></div>
+
+        <div class="flex justify-between items-end mb-8 z-10">
+            <div>
+                <span class="px-3 py-1 bg-green-50 text-green-700 text-xs font-bold uppercase tracking-widest rounded border border-green-200 mb-4 inline-block">
+                    Market & Strategy
+                </span>
+                <h1 class="h-headline">
+                    Capture the <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">Value Gap.</span>
+                </h1>
+            </div>
+            <div class="text-right">
+                <div class="text-sm font-bold text-slate-500 uppercase tracking-widest">Go-To-Market</div>
+                <div class="text-xl font-bold text-slate-900">Affiliate Loop Strategy</div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8 h-full w-full relative z-10">
+
+            <div class="col-span-5 bento-panel border-t-4 border-t-blue-600">
+                <div class="bento-header">
+                    <span><i class="fa-solid fa-chart-area mr-2"></i>Market Opportunity</span>
+                    <span class="text-blue-600 bg-blue-50 px-2 py-1 rounded text-xs">CAGR +18%</span>
+                </div>
+                
+                <h2 class="text-6xl font-extrabold text-slate-900 mb-2">$19 Billion</h2>
+                <p class="text-lg text-slate-500 font-medium mb-8">Total E-Commerce Gross Merchandise Value (GMV) in Malaysia (2025).</p>
+
+                <div class="bar-container">
+                    <div class="bar" style="height: 40%;">
+                        <span class="bar-label">2021</span>
+                    </div>
+                    <div class="bar" style="height: 60%;">
+                        <span class="bar-label">2023</span>
+                    </div>
+                    <div class="bar active" style="height: 100%;">
+                        <div class="absolute top-[-40px] left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs font-bold px-2 py-1 rounded">
+                            We Are Here
+                        </div>
+                        <span class="bar-label">2025</span>
+                    </div>
+                </div>
+                
+                <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between">
+                     <div>
+                         <div class="text-2xl font-bold text-slate-900">16.8M</div>
+                         <div class="text-xs text-slate-400 font-bold uppercase">Mobile Shoppers</div>
+                     </div>
+                     <div>
+                         <div class="text-2xl font-bold text-slate-900">RM 550</div>
+                         <div class="text-xs text-slate-400 font-bold uppercase">Avg Basket Size</div>
+                     </div>
+                </div>
+            </div>
+
+            <div class="col-span-7 flex flex-col gap-8">
+                
+                <div class="bento-panel flex-row items-center gap-8 border-t-4 border-t-green-500 h-[45%]">
+                    <div class="w-1/2">
+                        <div class="bento-header">
+                            <span><i class="fa-solid fa-hand-holding-dollar mr-2"></i>Revenue Model</span>
+                        </div>
+                        <h3 class="text-3xl font-bold text-slate-900 mb-2">Affiliate Loop</h3>
+                        <p class="text-sm text-slate-500 leading-relaxed mb-4">
+                            Zero cost to user. We monetize high-intent traffic sent to marketplaces.
+                        </p>
+                        <div class="flex gap-2">
+                            <span class="px-2 py-1 bg-orange-50 text-orange-600 text-xs font-bold rounded border border-orange-100">Shopee (4-9%)</span>
+                            <span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded border border-blue-100">Lazada (3-8%)</span>
+                        </div>
+                    </div>
+
+                    <div class="w-1/2 h-full bg-slate-50 rounded-xl flex flex-col justify-center items-center relative border border-slate-100">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fa-solid fa-bell text-slate-400"></i>
+                            <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
+                            <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg">Buy</div>
+                            <i class="fa-solid fa-arrow-right text-slate-300 text-xs"></i>
+                            <i class="fa-solid fa-sack-dollar text-green-500 text-xl animate-bounce"></i>
+                        </div>
+                        <div class="text-xs text-center font-bold text-slate-400 mt-2">
+                            1 Alert = 1 Purchase = Revenue
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bento-panel border-t-4 border-t-purple-600 h-[55%]">
+                    <div class="bento-header">
+                        <span><i class="fa-solid fa-chess mr-2"></i>Competitive Landscape</span>
+                    </div>
+
+                    <div class="w-full">
+                        <div class="comp-row border-b-2 border-slate-100">
+                            <div class="comp-head">Feature</div>
+                            <div class="comp-head text-center">Honey / Camel³</div>
+                            <div class="comp-head text-center text-blue-600">CheckLaPrice</div>
+                        </div>
+                        
+                        <div class="comp-row">
+                            <div class="text-sm font-bold text-slate-700">Works in Malaysia</div>
+                            <div class="text-center comp-x"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="text-center comp-check"><i class="fa-solid fa-check"></i></div>
+                        </div>
+
+                        <div class="comp-row">
+                            <div class="text-sm font-bold text-slate-700">Shopee/Lazada API</div>
+                            <div class="text-center comp-x"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="text-center comp-check"><i class="fa-solid fa-check"></i></div>
+                        </div>
+
+                        <div class="comp-row">
+                            <div class="text-sm font-bold text-slate-700">Sentiment Analysis (NLP)</div>
+                            <div class="text-center comp-x"><i class="fa-solid fa-xmark"></i></div>
+                            <div class="text-center comp-check"><i class="fa-solid fa-check-double"></i></div>
+                        </div>
+                        
+                         <div class="comp-row border-none">
+                            <div class="text-sm font-bold text-slate-700">Mobile-First</div>
+                            <div class="text-center text-slate-400 text-xs">Web Ext Only</div>
+                            <div class="text-center comp-check"><i class="fa-solid fa-mobile-screen"></i></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

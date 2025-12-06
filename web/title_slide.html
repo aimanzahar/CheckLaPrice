@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheckLaPrice - Title Slide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            /* Changed to Inter for better legibility */
+            font-family: 'Inter', sans-serif; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            color: #0f172a;
+        }
+
+        /* Custom Font Class for the Title */
+        .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .bg-grid {
+            background-image: 
+                linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 0;
+            mask-image: radial-gradient(circle at 50% 50%, black 40%, transparent 100%);
+        }
+
+        .text-gradient-main {
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .text-gradient-accent {
+            background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .glass-badge {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        @keyframes fade-up {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        .anim-delay-1 { animation: fade-up 0.8s ease-out forwards; opacity: 0; }
+        .anim-delay-2 { animation: fade-up 0.8s ease-out 0.2s forwards; opacity: 0; }
+        .anim-delay-3 { animation: fade-up 0.8s ease-out 0.4s forwards; opacity: 0; }
+        .anim-delay-4 { animation: fade-up 0.8s ease-out 0.6s forwards; opacity: 0; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-slow { animation: float 6s ease-in-out infinite; }
+    </style>
+</head>
+<body>
+
+    <div id="slide-container" class="relative w-full max-w-[1400px] aspect-video bg-white shadow-2xl flex flex-col justify-center items-center overflow-hidden border border-slate-200">
+
+        <div class="bg-grid"></div>
+        <div class="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-blue-100 rounded-full blur-[100px] opacity-60"></div>
+        <div class="absolute bottom-[-10%] left-[-5%] w-[600px] h-[600px] bg-cyan-100 rounded-full blur-[100px] opacity-60"></div>
+
+        <div class="relative z-10 text-center max-w-6xl px-8 mt-[-40px]"> <div class="inline-flex items-center gap-3 glass-badge px-6 py-2.5 rounded-full mb-8 anim-delay-1">
+                <span class="relative flex h-3 w-3">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
+                </span>
+                <span class="text-sm font-bold tracking-widest text-slate-500 uppercase font-mono">Cursor x Anthropic Hackathon Malaysia 2025</span>
+            </div>
+
+            <h1 class="font-display text-[10rem] leading-[0.9] font-black tracking-tight mb-8 anim-delay-2">
+                <span class="text-gradient-main">CheckLa</span><span class="text-gradient-accent">Price</span>
+            </h1>
+
+            <p class="text-5xl text-slate-500 font-medium tracking-tight mb-16 anim-delay-3 max-w-4xl mx-auto leading-tight">
+                The predictive intelligence engine that helps you <span class="text-slate-800 font-bold decoration-blue-300 underline decoration-4 underline-offset-4">beat the price hike</span>.
+            </p>
+
+            <div class="flex items-center justify-center gap-6 anim-delay-4">
+                <div class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-sm flex items-center gap-4 float-slow">
+                    <i class="fa-brands fa-react text-4xl text-blue-500"></i>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Mobile</div>
+                        <div class="text-xl font-bold text-slate-700">React Native</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-sm flex items-center gap-4 float-slow" style="animation-delay: 1s;">
+                    <i class="fa-solid fa-brain text-4xl text-purple-500"></i>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Engine</div>
+                        <div class="text-xl font-bold text-slate-700">NLP & Sentiment</div>
+                    </div>
+                </div>
+
+                <div class="bg-white border border-slate-200 px-8 py-4 rounded-2xl shadow-sm flex items-center gap-4 float-slow" style="animation-delay: 2s;">
+                    <i class="fa-solid fa-bolt text-4xl text-yellow-500"></i>
+                    <div class="text-left">
+                        <div class="text-xs text-slate-400 font-bold uppercase tracking-wider">Speed</div>
+                        <div class="text-xl font-bold text-slate-700">Real-time Alerts</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="absolute bottom-10 w-full px-16 flex justify-between items-end border-t border-slate-100 pt-8">
+            
+            <div class="flex items-center gap-3 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer group">
+                <i class="fa-brands fa-github text-2xl"></i>
+                <span class="text-lg font-mono font-medium group-hover:underline">github.com/aimanzahar</span>
+            </div>
+
+            <div class="text-right">
+                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mb-3">Presented By Team CheckLaPrice</p>
+                <div class="flex items-center gap-4">
+                    
+                    <div class="flex -space-x-4">
+                        <div class="h-12 w-12 rounded-full bg-slate-100 border-2 border-white flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm" title="Aiman">
+                            AI
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm" title="Azri">
+                            AZ
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-slate-300 border-2 border-white flex items-center justify-center text-sm font-bold text-slate-600 shadow-sm" title="Naim">
+                            NA
+                        </div>
+                        <div class="h-12 w-12 rounded-full bg-slate-800 border-2 border-white flex items-center justify-center text-sm font-bold text-white shadow-sm" title="Kevin">
+                            KE
+                        </div>
+                    </div>
+
+                    <div class="text-left border-l-2 border-slate-200 pl-4">
+                        <p class="text-sm font-bold text-slate-700 leading-tight">Aiman, Azri</p>
+                        <p class="text-sm font-bold text-slate-700 leading-tight">Naim, Kevin</p>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
