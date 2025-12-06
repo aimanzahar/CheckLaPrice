@@ -1,6 +1,7 @@
 import { useThemeColor } from '@/components/Themed';
+import { formatPrice } from '@/utils/constants';
 import React, { useState } from 'react';
-import { LayoutChangeEvent, Text, View, StyleSheet } from 'react-native';
+import { LayoutChangeEvent, StyleSheet, Text, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 interface PriceChartProps {
@@ -89,7 +90,7 @@ export function PriceChart({
           <View style={styles.currentPriceContainer}>
             <Text style={[styles.currentPriceLabel, { color: secondaryText }]}>Current</Text>
             <Text style={[styles.currentPrice, { color: primaryColor }]}>
-              ${currentPrice.toFixed(2)}
+              {formatPrice(currentPrice)}
             </Text>
             <View style={[
               styles.changeBadge,
@@ -107,13 +108,13 @@ export function PriceChart({
             <View style={styles.priceRangeItem}>
               <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>Lowest</Text>
               <Text style={[styles.priceRangeValue, { color: '#34C759' }]}>
-                ${lowestPrice.toFixed(2)}
+                {formatPrice(lowestPrice)}
               </Text>
             </View>
             <View style={styles.priceRangeItem}>
               <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>Highest</Text>
               <Text style={[styles.priceRangeValue, { color: '#FF3B30' }]}>
-                ${highestPrice.toFixed(2)}
+                {formatPrice(highestPrice)}
               </Text>
             </View>
           </View>
@@ -139,7 +140,7 @@ export function PriceChart({
             withShadow={true}
             withDots={showDots}
             fromZero={false}
-            yAxisLabel="$"
+            yAxisLabel="RM"
             yAxisSuffix=""
             segments={4}
             style={styles.chart}

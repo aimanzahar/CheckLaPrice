@@ -5,20 +5,21 @@ import { PriceChart } from '@/components/ui/PriceChart';
 import { SIZES } from '@/utils/constants';
 import React, { useState } from 'react';
 import {
-    ScrollView,
-    StyleSheet,
-    Switch,
-    View,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  View,
 } from 'react-native';
 import Animated, {
-    FadeIn,
-    FadeInDown,
-    FadeInUp,
-    SlideInRight,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  SlideInRight,
 } from 'react-native-reanimated';
 
 // Mock data for price history
 const generateMockPriceData = () => ({
+
   labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   datasets: [
     {
@@ -95,9 +96,9 @@ export default function AnalysisScreen() {
             <PriceChart data={priceData} height={200} />
           </Animated.View>
           <View style={styles.priceStats}>
-            <Animated.View entering={FadeInUp.delay(400)} style={styles.stat}>
+            <Animated.View entering={FadeInUp.delay(450)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Average</ThemedText>
-              <ThemedText style={styles.statValue}>$284.99</ThemedText>
+              <ThemedText style={styles.statValue}>RM 284.99</ThemedText>
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Volatility</ThemedText>

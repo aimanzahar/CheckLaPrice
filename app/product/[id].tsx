@@ -4,24 +4,24 @@ import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { SIZES } from '@/utils/constants';
+import { SIZES, formatPrice } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-    ActivityIndicator,
-    Alert,
-    ScrollView,
-    Share,
-    StyleSheet,
-    View,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
 } from 'react-native';
 import Animated, {
-    FadeIn,
-    FadeInDown,
-    FadeInUp,
-    ZoomIn
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  ZoomIn
 } from 'react-native-reanimated';
 
 export default function ProductDetailScreen() {
@@ -74,7 +74,7 @@ export default function ProductDetailScreen() {
   const handleShare = async () => {
     try {
       await Share.share({
-        message: `Check out this deal: ${product.name} is now $${product.currentPrice} at ${product.store}`,
+        message: `Check out this deal: ${product.name} is now ${formatPrice(product.currentPrice)} at ${product.store}`,
         url: product.url || '',
       });
     } catch (error) {
@@ -164,10 +164,10 @@ export default function ProductDetailScreen() {
           </View>
 
           <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.priceRow}>
-            <ThemedText style={styles.currentPrice}>${product.currentPrice.toFixed(2)}</ThemedText>
+            <ThemedText style={styles.currentPrice}>{formatPrice(product.currentPrice)}</ThemedText>
             {product.originalPrice && product.originalPrice > product.currentPrice && (
               <ThemedText style={styles.originalPrice}>
-                ${product.originalPrice.toFixed(2)}
+                {formatPrice(product.originalPrice)}
               </ThemedText>
             )}
           </Animated.View>
@@ -187,7 +187,7 @@ export default function ProductDetailScreen() {
             <Animated.View entering={FadeIn.delay(450)} style={styles.targetPriceRow}>
               <Ionicons name="notifications" size={18} color={tintColor} />
               <ThemedText style={styles.targetPriceText}>
-                Alert set for ${product.targetPrice.toFixed(2)}
+                Alert set for {formatPrice(product.targetPrice)}
               </ThemedText>
             </Animated.View>
           )}
@@ -202,15 +202,15 @@ export default function ProductDetailScreen() {
             <View style={styles.statsRow}>
               <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
                 <ThemedText style={styles.statLabel}>Lowest</ThemedText>
-                <ThemedText style={styles.statValue}>${lowestPrice.toFixed(2)}</ThemedText>
+                <ThemedText style={styles.statValue}>{formatPrice(lowestPrice)}</ThemedText>
               </Animated.View>
               <Animated.View entering={FadeInUp.delay(600)} style={styles.stat}>
                 <ThemedText style={styles.statLabel}>Highest</ThemedText>
-                <ThemedText style={styles.statValue}>${highestPrice.toFixed(2)}</ThemedText>
+                <ThemedText style={styles.statValue}>{formatPrice(highestPrice)}</ThemedText>
               </Animated.View>
               <Animated.View entering={FadeInUp.delay(700)} style={styles.stat}>
                 <ThemedText style={styles.statLabel}>Average</ThemedText>
-                <ThemedText style={styles.statValue}>${averagePrice.toFixed(2)}</ThemedText>
+                <ThemedText style={styles.statValue}>{formatPrice(averagePrice)}</ThemedText>
               </Animated.View>
             </View>
           </Card>

@@ -1,22 +1,22 @@
 import { useThemeColor } from '@/components/Themed';
-import { SIZES } from '@/utils/constants';
+import { SIZES, formatPrice } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View
+  Pressable,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 import Animated, {
-    FadeIn,
-    Layout,
-    SlideOutLeft,
-    useAnimatedStyle,
-    useSharedValue,
-    withSequence,
-    withSpring,
-    withTiming
+  FadeIn,
+  Layout,
+  SlideOutLeft,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 import { Card } from './Card';
 
@@ -130,7 +130,7 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
 
             <View style={styles.priceContainer}>
               <Text style={[styles.currentPrice, { color: textColor }]}>
-                ${product.currentPrice.toFixed(2)}
+                {formatPrice(product.currentPrice)}
               </Text>
 
               {hasDiscount && (
@@ -139,7 +139,7 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
                   style={styles.discountContainer}
                 >
                   <Text style={styles.originalPrice}>
-                    ${product.originalPrice!.toFixed(2)}
+                    {formatPrice(product.originalPrice!)}
                   </Text>
                   <View style={styles.discountBadge}>
                     <Text style={styles.discountText}>-{discountPercentage}%</Text>
@@ -157,7 +157,7 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
                     color={priceChangeColor}
                   />
                   <Text style={[styles.priceChangeText, { color: priceChangeColor }]}>
-                    {Math.abs(product.priceChange).toFixed(2)} ({product.trend})
+                    {formatPrice(Math.abs(product.priceChange))} ({product.trend})
                   </Text>
                 </View>
               )}

@@ -37,3 +37,12 @@ export const FONT_SIZES = {
   xxl: 24,
   xxxl: 32,
 };
+
+/**
+ * Format a number as Malaysian Ringgit (RM) currency
+ * @param price - The price to format
+ * @returns Formatted price string with RM prefix (e.g., "RM 99.00")
+ */
+export const formatPrice = (price: number): string => {
+  return `RM ${price.toFixed(2)}`;
+};

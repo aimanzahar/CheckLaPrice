@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { api } from '@/convex/_generated/api';
-import { SIZES } from '@/utils/constants';
+import { SIZES, formatPrice } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import { router } from 'expo-router';
@@ -131,7 +131,7 @@ export default function WishlistScreen() {
         </Card>
         <Card style={styles.statCard} delay={350}>
           <ThemedText style={styles.statNumber}>
-            ${products.reduce((sum: number, p: any) => sum + p.currentPrice, 0).toFixed(0)}
+            {formatPrice(products.reduce((sum: number, p: any) => sum + p.currentPrice, 0))}
           </ThemedText>
           <ThemedText style={styles.statLabel}>Total Value</ThemedText>
         </Card>

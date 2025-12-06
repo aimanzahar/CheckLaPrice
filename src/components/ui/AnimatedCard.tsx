@@ -57,7 +57,7 @@ export function AnimatedCard({
     <Animated.View
       style={[
         styles.card,
-        { backgroundColor, borderColor },
+        { backgroundColor },
         animatedStyle,
         style,
       ]}
@@ -70,16 +70,15 @@ export function AnimatedCard({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 16,
     padding: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
 });

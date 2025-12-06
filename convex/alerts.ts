@@ -90,44 +90,52 @@ export const seed = mutation({
 
     const sampleAlerts = [
       {
+        _id: "demo_alert_1" as Id<"alerts">,
+        _creationTime: Date.now(),
+        userId: "demo_user",
+        productId: "demo_product_1" as Id<"products">,
         type: "price_drop" as const,
         title: "Price Drop Alert",
-        message: "Sony WH-1000XM4 dropped by $20 (15% off) on Amazon. Now at $279.99 - lowest price in 30 days!",
+        message: "Sony WH-1000XM4 dropped by RM 20 (15% off) on Amazon. Now at RM 279.99 - lowest price in 30 days!",
         productName: "Sony WH-1000XM4 Wireless Headphones",
-        timestamp: new Date(Date.now() - 10 * 60 * 1000).toISOString(), // 10 minutes ago
-        read: false,
+        isRead: false,
+        createdAt: new Date().toISOString(),
       },
       {
+        _id: "demo_alert_2" as Id<"alerts">,
+        _creationTime: Date.now(),
+        userId: "demo_user",
+        productId: null,
         type: "trend_warning" as const,
-        title: "Trend Alert",
-        message: "Prices for Apple iPad Air are trending up. Consider buying now if you need it soon.",
-        productName: "Apple iPad Air (5th Generation)",
-        timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
-        read: false,
+        title: "Market Trend Warning",
+        message: "Tech sector showing inflation trends. Monitor prices closely over the next 2 weeks.",
+        productName: undefined,
+        isRead: true,
+        createdAt: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
       },
       {
-        type: "news_alert" as const,
-        title: "Market News",
-        message: "Amazon Prime Day announced for next week. Expected deals on electronics and home goods.",
-        productName: "Multiple Items",
-        timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(), // 5 hours ago
-        read: true,
-      },
-      {
+        _id: "demo_alert_3" as Id<"alerts">,
+        _creationTime: Date.now(),
+        userId: "demo_user",
+        productId: "demo_product_3" as Id<"products">,
         type: "price_hike" as const,
         title: "Price Increase Warning",
-        message: "Samsung 65-inch TV price increased by $50 (5% increase) across all stores.",
+        message: "Samsung 65-inch TV price increased by RM 50 (5% increase) across all stores.",
         productName: "Samsung 65-inch 4K Smart TV",
-        timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(), // 1 day ago
-        read: true,
+        isRead: false,
+        createdAt: new Date().toISOString(),
       },
       {
+        _id: "demo_alert_4" as Id<"alerts">,
+        _creationTime: Date.now(),
+        userId: "demo_user",
+        productId: "demo_product_2" as Id<"products">,
         type: "price_drop" as const,
         title: "Back in Stock - Price Drop",
         message: "Previously out-of-stock item is now available with 10% discount.",
-        productName: "Nintendo Switch OLED",
-        timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days ago
-        read: true,
+        productName: "Apple iPad Air (5th Generation)",
+        isRead: true,
+        createdAt: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
       },
     ];
 

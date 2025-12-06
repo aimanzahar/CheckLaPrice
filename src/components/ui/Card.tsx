@@ -1,6 +1,6 @@
-import React, { ReactNode } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
 import { useThemeColor } from '@/components/Themed';
+import React, { ReactNode } from 'react';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 
 interface CardProps {
   children: ReactNode;
@@ -12,12 +12,11 @@ interface CardProps {
 export function Card({ children, style, variant = 'default', padding = 16 }: CardProps) {
   const backgroundColor = useThemeColor({ light: '#ffffff', dark: '#1a1a1a' }, 'background');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
-  const shadowColor = useThemeColor({ light: '#000000', dark: '#000000' }, 'shadow');
 
   const getCardStyle = (): ViewStyle => {
     const baseStyle: ViewStyle = {
       backgroundColor,
-      borderRadius: 12,
+      borderRadius: 16,
       padding,
     };
 
@@ -25,10 +24,10 @@ export function Card({ children, style, variant = 'default', padding = 16 }: Car
       case 'elevated':
         return {
           ...baseStyle,
-          shadowColor,
+          shadowColor: '#000',
           shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
           elevation: 3,
         };
       case 'outlined':
