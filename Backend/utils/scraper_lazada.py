@@ -97,11 +97,54 @@ class Scraper:
 
     def _get_image_url(self, element, selector: str) -> str:
         """
-        Extracts the image URL from an element and logs the HTML for debugging.
+        Extracts the image URL from an element, handling lazy-loaded images.
+        Checks multiple attributes in priority order to find valid image URLs.
         """
         tag = element.select_one(selector)
-        if tag:
-            logging.debug(f"Extracted image tag HTML: {tag}")
-            return tag.get('src', 'N/A')
-        logging.warning(f"Image tag not found with selector: {selector}")
+        if not tag:
+            logging.warning(f"Image tag not found with selector: {selector}")
+            return "N/A"
+        
+        logging.debug(f"Extracted image tag HTML: {tag}")
+        
+        # Priority order for lazy-loaded images
+        attrs_to_check = ['data-src', 'data-lazy-src', 'data-original', 'src']
+        
+        for attr in attrs_to_check:
+            url = tag.get(attr, '')
+            if url and self._is_valid_image_url(url):
+                return url
+        
         return "N/A"
+
+    def _is_valid_image_url(self, url: str) -> bool:
+        """
+        Validates if a URL is a valid image URL.
+        Filters out data URIs, empty strings, and placeholder images.
+        """
+        if not url:
+            return False
+        
+        # Skip data URIs (base64 encoded images or placeholders)
+        if url.startswith('data:'):
+            return False
+        
+        # Skip empty or N/A values
+        if url in ('', 'N/A', 'null', 'undefined'):
+            return False
+        
+        # Skip common placeholder patterns
+        placeholder_patterns = [
+            'placeholder',
+            'loading',
+            'blank.gif',
+            'empty.png',
+            '1x1.gif',
+            'pixel.gif'
+        ]
+        url_lower = url.lower()
+        for pattern in placeholder_patterns:
+            if pattern in url_lower:
+                return False
+        
+        return True

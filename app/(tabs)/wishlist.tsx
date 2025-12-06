@@ -235,3 +235,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.xl,
   },
 });
+
