@@ -1,22 +1,22 @@
 import { useThemeColor } from '@/components/Themed';
-import { SIZES } from '@/utils/constants';
+import { SIZES, formatPrice, formatRelativeTime } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View
+  Pressable,
+  StyleSheet,
+  Text,
+  View
 } from 'react-native';
 import Animated, {
-    FadeIn,
-    Layout,
-    SlideOutLeft,
-    useAnimatedStyle,
-    useSharedValue,
-    withSequence,
-    withSpring,
-    withTiming
+  FadeIn,
+  Layout,
+  SlideOutLeft,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
 } from 'react-native-reanimated';
 import { Card } from './Card';
 
@@ -83,8 +83,15 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
     transform: [{ scale: deleteScale.value }],
   }));
 
-  const priceChangeColor = product.trend === 'up' ? errorColor : successColor;
-  const priceChangeIcon = product.trend === 'up' ? 'trending-up' : 'trending-down';
+  const changeValue = product.priceChange ?? 0;
+  const showPriceChange = changeValue !== 0;
+  const isIncrease = changeValue > 0;
+  const priceChangeColor = isIncrease ? errorColor : successColor;
+  const priceChangeIcon = isIncrease ? 'trending-up' : 'trending-down';
+  const formattedUpdated = formatRelativeTime(product.lastUpdated);
+  const priceChangeBackground = isIncrease
+    ? 'rgba(255, 59, 48, 0.08)'
+    : 'rgba(52, 199, 89, 0.1)';
   const hasDiscount = product.originalPrice && product.originalPrice > product.currentPrice;
   const discountPercentage = hasDiscount
     ? Math.round(((product.originalPrice! - product.currentPrice) / product.originalPrice!) * 100)
@@ -103,9 +110,11 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
           onPressOut={handlePressOut}
           style={[styles.content, animatedCardStyle]}
         >
+          {/* sharedTransitionTag is provided by Reanimated shared transitions */}
           <Animated.Image
-            source={{ uri: product.image }}
+            source={{ uri: product.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300' }}
             style={styles.image}
+            // @ts-expect-error sharedTransitionTag is available via Reanimated
             sharedTransitionTag={`product-image-${product.id}`}
           />
 
@@ -130,7 +139,7 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
 
             <View style={styles.priceContainer}>
               <Text style={[styles.currentPrice, { color: textColor }]}>
-                ${product.currentPrice.toFixed(2)}
+                {formatPrice(product.currentPrice)}
               </Text>
 
               {hasDiscount && (
@@ -139,7 +148,7 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
                   style={styles.discountContainer}
                 >
                   <Text style={styles.originalPrice}>
-                    ${product.originalPrice!.toFixed(2)}
+                    {formatPrice(product.originalPrice!)}
                   </Text>
                   <View style={styles.discountBadge}>
                     <Text style={styles.discountText}>-{discountPercentage}%</Text>
@@ -149,20 +158,20 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
             </View>
 
             <View style={styles.footer}>
-              {product.priceChange !== undefined && (
-                <View style={styles.priceChange}>
+              {showPriceChange && (
+                <View style={[styles.priceChange, { backgroundColor: priceChangeBackground }]}>
                   <Ionicons
                     name={priceChangeIcon}
                     size={16}
                     color={priceChangeColor}
                   />
                   <Text style={[styles.priceChangeText, { color: priceChangeColor }]}>
-                    {Math.abs(product.priceChange).toFixed(2)} ({product.trend})
+                    {`${isIncrease ? '+' : '-'}${formatPrice(Math.abs(changeValue))}`}
                   </Text>
                 </View>
               )}
               <Text style={[styles.lastUpdated, { color: borderColor }]}>
-                {product.lastUpdated}
+                {`Updated ${formattedUpdated}`}
               </Text>
             </View>
           </View>
@@ -175,20 +184,22 @@ export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCa
 const styles = StyleSheet.create({
   container: {
     marginVertical: SIZES.sm,
+    borderRadius: 16,
   },
   content: {
     flexDirection: 'row',
-    padding: 0,
+    padding: SIZES.sm,
   },
   image: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+    width: 96,
+    height: 96,
+    borderRadius: 12,
     resizeMode: 'cover',
+    backgroundColor: '#f3f4f6',
   },
   details: {
     flex: 1,
-    marginLeft: SIZES.md,
+    marginLeft: SIZES.sm,
     justifyContent: 'space-between',
   },
   header: {
@@ -252,6 +263,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flexShrink: 1,
+    paddingHorizontal: SIZES.xs,
+    paddingVertical: 4,
+    borderRadius: 999,
   },
   priceChangeText: {
     fontSize: 12,

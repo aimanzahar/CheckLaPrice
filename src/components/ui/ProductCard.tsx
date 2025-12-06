@@ -1,15 +1,15 @@
+import { useThemeColor } from '@/components/Themed';
+import { SIZES, formatPrice } from '@/utils/constants';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
   Image,
   StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useThemeColor } from '@/components/Themed';
 import { Card } from './Card';
-import { SIZES } from '@/utils/constants';
 
 interface ProductCardProps {
   product: {
@@ -58,17 +58,19 @@ export function ProductCard({ product, onPress, onDelete }: ProductCardProps) {
             )}
           </View>
 
-          <Text style={[styles.store, { color: primaryColor }]}>{product.store}</Text>
+          <Text style={[styles.store, { color: primaryColor }]}>
+            {product.store}
+          </Text>
 
           <View style={styles.priceContainer}>
             <Text style={[styles.currentPrice, { color: textColor }]}>
-              ${product.currentPrice.toFixed(2)}
+              {formatPrice(product.currentPrice)}
             </Text>
 
             {hasDiscount && (
               <View style={styles.discountContainer}>
                 <Text style={styles.originalPrice}>
-                  ${product.originalPrice!.toFixed(2)}
+                  {formatPrice(product.originalPrice!)}
                 </Text>
                 <View style={styles.discountBadge}>
                   <Text style={styles.discountText}>-{discountPercentage}%</Text>
@@ -86,7 +88,7 @@ export function ProductCard({ product, onPress, onDelete }: ProductCardProps) {
                   color={priceChangeColor}
                 />
                 <Text style={[styles.priceChangeText, { color: priceChangeColor }]}>
-                  {Math.abs(product.priceChange).toFixed(2)} ({product.trend})
+                  {formatPrice(Math.abs(product.priceChange))} ({product.trend})
                 </Text>
               </View>
             )}

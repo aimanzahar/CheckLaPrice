@@ -148,7 +148,7 @@ export default function HomeScreen() {
         {/* Problem Statement */}
         <View style={styles.section}>
           <Animated.View entering={FadeInDown.delay(600).springify()}>
-            <Card style={[styles.problemCard, { backgroundColor: '#EF444420' }]} variant="elevated">
+            <Card style={styles.problemCard} variant="elevated">
               <View style={styles.problemHeader}>
                 <Ionicons name="help-circle" size={24} color="#EF4444" />
                 <ThemedText style={styles.problemTitle}>The Problem</ThemedText>
@@ -177,7 +177,7 @@ export default function HomeScreen() {
           </Animated.View>
 
           <Animated.View entering={FadeInDown.delay(700).springify()}>
-            <Card style={[styles.solutionCard, { backgroundColor: '#10B98120' }]} variant="elevated">
+            <Card style={styles.solutionCard} variant="elevated">
               <View style={styles.problemHeader}>
                 <Ionicons name="checkmark-circle" size={24} color="#10B981" />
                 <ThemedText style={styles.solutionTitle}>Our Solution</ThemedText>
@@ -216,31 +216,33 @@ export default function HomeScreen() {
           </Animated.View>
 
           <View style={styles.stepsContainer}>
-            {[
-              { step: '1', title: 'Add Product', desc: 'Paste URL or enter manually', icon: 'add-circle' as const },
-              { step: '2', title: 'We Track', desc: 'Monitor prices & news 24/7', icon: 'eye' as const },
-              { step: '3', title: 'Get Alerted', desc: 'Notified when prices drop', icon: 'notifications' as const },
-              { step: '4', title: 'Save Money', desc: 'Buy at the best price', icon: 'wallet' as const },
-            ].map((item, index) => (
-              <Animated.View
-                key={item.step}
-                entering={FadeInUp.delay(1400 + index * 100).springify()}
-                style={styles.stepItem}
-              >
-                <LinearGradient
-                  colors={['#3B82F6', '#8B5CF6']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.stepNumber}
+            {
+              [
+                { step: '1', title: 'Add Product', desc: 'Paste URL or enter manually', icon: 'add-circle' as const },
+                { step: '2', title: 'We Track', desc: 'Monitor prices & news 24/7', icon: 'eye' as const },
+                { step: '3', title: 'Get Alerted', desc: 'Notified when prices drop', icon: 'notifications' as const },
+                { step: '4', title: 'Save Money', desc: 'Buy at the best price', icon: 'wallet' as const },
+              ].map((item, index) => (
+                <Animated.View
+                  key={item.step}
+                  entering={FadeInUp.delay(1400 + index * 100).springify()}
+                  style={styles.stepItem}
                 >
-                  <Ionicons name={item.icon} size={20} color="#fff" />
-                </LinearGradient>
-                <ThemedText style={styles.stepTitle}>{item.title}</ThemedText>
-                <ThemedText style={[styles.stepDesc, { color: textColor + '99' }]}>
-                  {item.desc}
-                </ThemedText>
-              </Animated.View>
-            ))}
+                  <LinearGradient
+                    colors={['#3B82F6', '#8B5CF6']}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.stepNumber}
+                  >
+                    <Ionicons name={item.icon} size={20} color="#fff" />
+                  </LinearGradient>
+                  <ThemedText style={styles.stepTitle}>{item.title}</ThemedText>
+                  <ThemedText style={[styles.stepDesc, { color: textColor + '99' }]}>
+                    {item.desc}
+                  </ThemedText>
+                </Animated.View>
+              ))
+            }
           </View>
         </View>
 
@@ -364,7 +366,13 @@ const styles = StyleSheet.create({
   problemCard: {
     padding: SIZES.lg,
     marginBottom: SIZES.md,
-    borderRadius: 16,
+    borderRadius: 20,
+    backgroundColor: '#FEF2F2',
+    shadowColor: '#EF4444',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   problemHeader: {
     flexDirection: 'row',
@@ -375,7 +383,7 @@ const styles = StyleSheet.create({
   problemTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#EF4444',
+    color: '#DC2626',
   },
   problemList: {
     gap: SIZES.sm,
@@ -391,12 +399,18 @@ const styles = StyleSheet.create({
   },
   solutionCard: {
     padding: SIZES.lg,
-    borderRadius: 16,
+    borderRadius: 20,
+    backgroundColor: '#ECFDF5',
+    shadowColor: '#10B981',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   solutionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#10B981',
+    color: '#059669',
   },
   solutionText: {
     fontSize: 14,

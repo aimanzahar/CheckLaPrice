@@ -1,8 +1,8 @@
-import React from 'react';
-import { View, Dimensions, Text, StyleSheet } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
 import { useThemeColor } from '@/components/Themed';
-import { SIZES } from '@/utils/constants';
+import { formatPrice, SIZES } from '@/utils/constants';
+import React from 'react';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -83,33 +83,28 @@ export function PriceChart({
       {withDecorator && (
         <View style={styles.priceHeader}>
           <View style={styles.currentPriceContainer}>
-            <Text style={[styles.currentPriceLabel, { color: secondaryText }]}>Current</Text>
             <Text style={[styles.currentPrice, { color: primaryColor }]}>
-              ${currentPrice.toFixed(2)}
+              {formatPrice(currentPrice)}
             </Text>
-            <View style={[
-              styles.changeBadge,
-              { backgroundColor: isPositive ? 'rgba(255, 59, 48, 0.1)' : 'rgba(52, 199, 89, 0.1)' }
-            ]}>
-              <Text style={[
-                styles.changeText,
-                { color: isPositive ? '#FF3B30' : '#34C759' }
-              ]}>
-                {isPositive ? '↑' : '↓'} {Math.abs(Number(priceChangePercent))}%
-              </Text>
-            </View>
+            {priceChange !== 0 && (
+              <View style={[styles.changeBadge, { backgroundColor: isPositive ? '#34C759' : '#FF3B30' }]}>
+                <Text style={[styles.changeText, { color: '#fff' }]}>
+                  {isPositive ? '+' : ''}{priceChangePercent}%
+                </Text>
+              </View>
+            )}
           </View>
           <View style={styles.priceRangeContainer}>
             <View style={styles.priceRangeItem}>
-              <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>Lowest</Text>
+              <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>Low</Text>
               <Text style={[styles.priceRangeValue, { color: '#34C759' }]}>
-                ${lowestPrice.toFixed(2)}
+                {formatPrice(lowestPrice)}
               </Text>
             </View>
             <View style={styles.priceRangeItem}>
-              <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>Highest</Text>
+              <Text style={[styles.priceRangeLabel, { color: secondaryText }]}>High</Text>
               <Text style={[styles.priceRangeValue, { color: '#FF3B30' }]}>
-                ${highestPrice.toFixed(2)}
+                {formatPrice(highestPrice)}
               </Text>
             </View>
           </View>
@@ -131,7 +126,7 @@ export function PriceChart({
           withShadow={true}
           withDots={showDots}
           fromZero={false}
-          yAxisLabel="$"
+          yAxisLabel="RM"
           yAxisSuffix=""
           segments={4}
           style={styles.chart}

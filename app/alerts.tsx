@@ -3,69 +3,68 @@ import { AlertCard } from '@/components/ui/AlertCard';
 import { SIZES } from '@/utils/constants';
 import React, { useState } from 'react';
 import {
-    FlatList,
-    Pressable,
-    RefreshControl,
-    StyleSheet,
-    View,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  StyleSheet,
+  View,
 } from 'react-native';
 import Animated, {
-    FadeIn,
-    FadeInDown,
-    FadeInUp,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
 } from 'react-native-reanimated';
 
 // Sample alerts for demo
-const sampleAlerts = [
+const mockAlerts = [
   {
     id: '1',
     type: 'price_drop' as const,
     title: 'Price Drop Alert',
-    message: 'Sony WH-1000XM4 dropped by $20 (15% off) on Amazon. Now at $279.99 - lowest price in 30 days!',
+    message: 'Sony WH-1000XM4 dropped by RM 20 (15% off) on Amazon. Now at RM 279.99 - lowest price in 30 days!',
     productName: 'Sony WH-1000XM4 Wireless Headphones',
-    timestamp: '10 minutes ago',
-    read: false,
+    timestamp: '2 hours ago',
+    isRead: false,
   },
   {
     id: '2',
-    type: 'trend_warning' as const,
-    title: 'Trend Alert',
-    message: 'Prices for Apple iPad Air are trending up. Consider buying now if you need it soon.',
-    productName: 'Apple iPad Air (5th Generation)',
-    timestamp: '2 hours ago',
-    read: false,
+    type: 'news' as const,
+    title: 'Market Update',
+    message: 'Tech stocks surging - Electronics could see temporary price increases',
+    timestamp: '5 hours ago',
+    isRead: false,
   },
   {
     id: '3',
-    type: 'news_alert' as const,
-    title: 'Market News',
-    message: 'Amazon Prime Day announced for next week. Expected deals on electronics and home goods.',
-    productName: 'Multiple Items',
-    timestamp: '5 hours ago',
-    read: true,
+    type: 'back_in_stock' as const,
+    title: 'Back in Stock',
+    message: 'PlayStation 5 is now available at your tracked stores',
+    productName: 'PlayStation 5 Console',
+    timestamp: '1 day ago',
+    isRead: true,
   },
   {
     id: '4',
     type: 'price_hike' as const,
     title: 'Price Increase Warning',
-    message: 'Samsung 65-inch TV price increased by $50 (5% increase) across all stores.',
+    message: 'Samsung 65-inch TV price increased by RM 50 (5% increase) across all stores.',
     productName: 'Samsung 65-inch 4K Smart TV',
-    timestamp: '1 day ago',
-    read: true,
+    timestamp: '2 days ago',
+    isRead: true,
   },
   {
     id: '5',
     type: 'price_drop' as const,
     title: 'Back in Stock - Price Drop',
     message: 'Previously out-of-stock item is now available with 10% discount.',
-    productName: 'Nintendo Switch OLED',
-    timestamp: '2 days ago',
-    read: true,
+    productName: 'Apple AirPods Pro (2nd Gen)',
+    timestamp: '3 days ago',
+    isRead: true,
   },
 ];
 
 export default function AlertsScreen() {
-  const [alerts, setAlerts] = useState(sampleAlerts);
+  const [alerts, setAlerts] = useState(mockAlerts);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const tintColor = useThemeColor({}, 'tint');
@@ -76,14 +75,14 @@ export default function AlertsScreen() {
   const filteredAlerts = alerts.filter(alert => {
     switch (selectedIndex) {
       case 0: return true;
-      case 1: return !alert.read;
+      case 1: return !alert.isRead;
       case 2: return alert.type === 'price_drop';
       case 3: return alert.type === 'news_alert' || alert.type === 'trend_warning';
       default: return true;
     }
   });
 
-  const unreadCount = alerts.filter(a => !a.read).length;
+  const unreadCount = alerts.filter(a => !a.isRead).length;
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -93,13 +92,13 @@ export default function AlertsScreen() {
 
   const handleAlertPress = (alertId: string) => {
     setAlerts(prev => prev.map(a => 
-      a.id === alertId ? { ...a, read: true } : a
+      a.id === alertId ? { ...a, isRead: true } : a
     ));
   };
 
   const handleMarkAsRead = (alertId: string) => {
     setAlerts(prev => prev.map(a => 
-      a.id === alertId ? { ...a, read: true } : a
+      a.id === alertId ? { ...a, isRead: true } : a
     ));
   };
 
@@ -108,7 +107,7 @@ export default function AlertsScreen() {
   };
 
   const handleMarkAllAsRead = () => {
-    setAlerts(prev => prev.map(a => ({ ...a, read: true })));
+    setAlerts(prev => prev.map(a => ({ ...a, isRead: true })));
   };
 
   const renderHeader = () => (

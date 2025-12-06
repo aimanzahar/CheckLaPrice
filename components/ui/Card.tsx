@@ -112,24 +112,24 @@ export function Card({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 12,
-    borderWidth: 1,
+    borderRadius: 16,
     padding: 8,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
       height: 2,
     },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
   },
   elevated: {
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 8,
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
   },
   outlined: {
+    borderWidth: 1,
     shadowOpacity: 0,
     elevation: 0,
   },

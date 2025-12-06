@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { ProductCard } from '@/components/ui/ProductCard';
 import { api } from '@/convex/_generated/api';
-import { SIZES } from '@/utils/constants';
+import { SIZES, formatPrice } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import { router } from 'expo-router';
@@ -117,24 +117,45 @@ export default function WishlistScreen() {
     <View style={styles.header}>
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
         <ThemedText style={styles.title}>My Wishlist</ThemedText>
+        <ThemedText style={styles.subtitle}>Live prices from Lazada & Shopee</ThemedText>
       </Animated.View>
       <View style={styles.statsRow}>
-        <Card style={styles.statCard} delay={150}>
-          <ThemedText style={styles.statNumber}>{products.length}</ThemedText>
-          <ThemedText style={styles.statLabel}>Items</ThemedText>
-        </Card>
-        <Card style={styles.statCard} delay={250}>
-          <ThemedText style={styles.statNumber}>
-            {products.filter((p: any) => p.trend === 'down').length}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>Dropping</ThemedText>
-        </Card>
-        <Card style={styles.statCard} delay={350}>
-          <ThemedText style={styles.statNumber}>
-            ${products.reduce((sum: number, p: any) => sum + p.currentPrice, 0).toFixed(0)}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>Total Value</ThemedText>
-        </Card>
+        {[
+          { label: 'Items', value: products.length, color: tintColor, delay: 150 },
+          {
+            label: 'Dropping',
+            value: products.filter((p: any) => p.trend === 'down').length,
+            color: '#16a34a',
+            delay: 250,
+          },
+          {
+            label: 'Total Value',
+            value: formatPrice(products.reduce((sum: number, p: any) => sum + p.currentPrice, 0)),
+            color: '#f59e0b',
+            delay: 350,
+          },
+        ].map(stat => (
+          <Card
+            key={stat.label}
+            style={[styles.statCard, { borderLeftColor: stat.color }]}
+            delay={stat.delay}
+            animated={false}
+            variant="outlined"
+          >
+            <View style={styles.statTop}>
+              <View style={[styles.statDot, { backgroundColor: stat.color }]} />
+              <ThemedText style={styles.statLabel}>{stat.label}</ThemedText>
+            </View>
+            <ThemedText
+              style={[styles.statNumber, { color: stat.color }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {stat.value}
+            </ThemedText>
+          </Card>
+        ))}
       </View>
     </View>
   );
@@ -186,24 +207,45 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: SIZES.md,
   },
+  subtitle: {
+    fontSize: 14,
+    opacity: 0.7,
+    marginTop: -SIZES.xs,
+    marginBottom: SIZES.md,
+  },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: SIZES.sm,
   },
   statCard: {
     flex: 1,
-    alignItems: 'center',
-    padding: SIZES.md,
+    paddingVertical: SIZES.md,
+    paddingHorizontal: SIZES.md,
     marginHorizontal: SIZES.xs / 2,
-    backgroundColor: 'transparent',
+    borderLeftWidth: 3,
+    borderRadius: 12,
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
+  statTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SIZES.xs,
+  },
+  statDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: SIZES.xs,
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
   },
   statLabel: {
     fontSize: 12,
-    marginTop: 4,
+    opacity: 0.7,
+    fontWeight: '500',
   },
   list: {
     paddingHorizontal: SIZES.md,
@@ -235,3 +277,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: SIZES.xl,
   },
 });
+

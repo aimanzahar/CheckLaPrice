@@ -2,114 +2,146 @@ import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/compone
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { SIZES } from '@/utils/constants';
 import { api } from '@/convex/_generated/api';
+import { apiService, ScrapedProduct } from '@/src/services/api';
+import { formatPrice, SIZES } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation } from 'convex/react';
+import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  FadeOut,
-  SlideInUp,
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    FadeOut,
+    SlideInUp,
 } from 'react-native-reanimated';
 
+type Step = 'search' | 'selection' | 'details';
+
 export default function AddProductScreen() {
-  const { url } = useLocalSearchParams<{ url?: string }>();
   const addProduct = useMutation(api.products.add);
   
-  const [productUrl, setProductUrl] = useState(url || '');
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [scrapedProducts, setScrapedProducts] = useState<ScrapedProduct[]>([]);
+  
+  // Selected product state
+  const [selectedProduct, setSelectedProduct] = useState<ScrapedProduct | null>(null);
+  
+  // Form state
   const [productName, setProductName] = useState('');
-  const [productPrice, setProductPrice] = useState('');
-  const [productStore, setProductStore] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
+  
+  // UI state
   const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState<'url' | 'details'>('url');
-  const [extractedData, setExtractedData] = useState<any>(null);
+  const [step, setStep] = useState<Step>('search');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
+  const cardBgColor = useThemeColor({ light: '#ffffff', dark: '#1a1a1a' }, 'background');
 
-  const commonStores = [
-    { name: 'Amazon', url: 'amazon.com', icon: 'https://via.placeholder.com/30' },
-    { name: 'Best Buy', url: 'bestbuy.com', icon: 'https://via.placeholder.com/30' },
-    { name: 'Target', url: 'target.com', icon: 'https://via.placeholder.com/30' },
-    { name: 'Walmart', url: 'walmart.com', icon: 'https://via.placeholder.com/30' },
-  ];
-
-  const handleExtractProduct = async () => {
-    if (!productUrl) {
-      Alert.alert('Error', 'Please enter a product URL');
+  const handleSearchProducts = async () => {
+    if (!searchQuery.trim()) {
+      Alert.alert('Error', 'Please enter a search term');
       return;
     }
 
     setLoading(true);
+    setErrorMessage(null);
+    console.log('[AddProduct] Search pressed', {
+      query: searchQuery.trim(),
+      step,
+    });
+    
     try {
-      // Simulate product extraction
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      // Mock extracted data
-      const mockData = {
-        name: 'Sample Product from URL',
-        price: 99.99,
-        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
-        store: 'Amazon',
-        description: 'A great product extracted from the URL',
-      };
-
-      setExtractedData(mockData);
-      setProductName(mockData.name);
-      setStep('details');
+      const response = await apiService.scrapeAll(searchQuery.trim());
+      console.log('[AddProduct] Search response', {
+        success: response.success,
+        count: response.data?.length ?? 0,
+        error: response.error,
+      });
+      
+      if (!response.success) {
+        setErrorMessage(response.error || 'Failed to search products');
+        Alert.alert('Error', response.error || 'Failed to search products');
+        return;
+      }
+      
+      if (!response.data || response.data.length === 0) {
+        setErrorMessage('No products found. Try a different search term.');
+        Alert.alert('No Results', 'No products found. Try a different search term.');
+        return;
+      }
+      
+      setScrapedProducts(response.data);
+      setStep('selection');
     } catch (error) {
-      Alert.alert('Error', 'Failed to extract product information. Please try again.');
+      console.log('[AddProduct] Search error', error);
+      const message = error instanceof Error ? error.message : 'An unexpected error occurred';
+      setErrorMessage(message);
+      Alert.alert('Error', message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleManualEntry = () => {
+  const handleSelectProduct = (product: ScrapedProduct) => {
+    setSelectedProduct(product);
+    setProductName(product.name);
     setStep('details');
   };
 
+  const handleBackToSearch = () => {
+    setStep('search');
+    setScrapedProducts([]);
+    setSelectedProduct(null);
+    setErrorMessage(null);
+  };
+
+  const handleBackToSelection = () => {
+    setStep('selection');
+    setSelectedProduct(null);
+  };
+
   const handleAddToWishlist = async () => {
-    if (!productName) {
+    if (!selectedProduct) {
+      Alert.alert('Error', 'No product selected');
+      return;
+    }
+
+    if (!productName.trim()) {
       Alert.alert('Error', 'Please enter a product name');
       return;
     }
 
-    const price = extractedData?.price || parseFloat(productPrice) || 0;
+    const price = selectedProduct.price;
     if (price <= 0) {
-      Alert.alert('Error', 'Please enter a valid price');
-      return;
-    }
-
-    const store = extractedData?.store || productStore || 'Unknown';
-    if (!store || store === 'Unknown') {
-      Alert.alert('Error', 'Please enter a store name');
+      Alert.alert('Error', 'Invalid product price');
       return;
     }
 
     setLoading(true);
     try {
-      // Save to Convex
       await addProduct({
         name: productName,
         currentPrice: price,
-        originalPrice: price,
-        image: extractedData?.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
-        store: store,
-        url: productUrl || undefined,
-        description: extractedData?.description,
+        originalPrice: selectedProduct.originalPrice || price,
+        image: selectedProduct.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
+        store: selectedProduct.store || 'Lazada',
+        url: selectedProduct.url || undefined,
         targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
       });
 
@@ -131,71 +163,145 @@ export default function AddProductScreen() {
     }
   };
 
-  const renderUrlStep = () => (
+  const renderSearchStep = () => (
     <Animated.View
       entering={FadeIn.duration(300)}
       exiting={FadeOut.duration(200)}
     >
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-        <ThemedText style={styles.title}>Add Product</ThemedText>
+        <ThemedText style={styles.title}>Search Lazada & Shopee</ThemedText>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(200).duration(400)}>
         <ThemedText style={styles.subtitle}>
-          Enter the product URL to automatically fetch details
+          Enter a product name to search across both stores
         </ThemedText>
       </Animated.View>
 
       <Animated.View entering={SlideInUp.delay(300).springify()}>
         <Input
-          label="Product URL"
-          value={productUrl}
-          onChangeText={setProductUrl}
-          placeholder="https://www.amazon.com/dp/..."
+          label="Search Query"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="e.g., minecraft, laptop, headphones"
           autoCapitalize="none"
-          keyboardType="url"
-          leftIcon={<Ionicons name="link" size={20} color={tintColor} />}
+          leftIcon={<Ionicons name="search" size={20} color={tintColor} />}
         />
       </Animated.View>
+
+      {errorMessage && (
+        <Animated.View entering={FadeIn.delay(100)}>
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle" size={20} color="#ef4444" />
+            <ThemedText style={styles.errorText}>{errorMessage}</ThemedText>
+          </View>
+        </Animated.View>
+      )}
 
       <Animated.View entering={FadeInUp.delay(400).springify()}>
         <Button
-          title={loading ? 'Extracting...' : 'Extract Product Info'}
-          onPress={handleExtractProduct}
+          title={loading ? 'Searching...' : 'Search Lazada + Shopee'}
+          onPress={handleSearchProducts}
           loading={loading}
-          style={styles.extractButton}
+          style={styles.searchButton}
+          icon={!loading ? <Ionicons name="search" size={20} color="#fff" /> : undefined}
         />
       </Animated.View>
 
-      <Animated.View entering={FadeIn.delay(500)} style={styles.divider}>
-        <View style={[styles.line, { backgroundColor: borderColor }]} />
-        <ThemedText style={styles.orText}>OR</ThemedText>
-        <View style={[styles.line, { backgroundColor: borderColor }]} />
+      <Animated.View entering={FadeIn.delay(500)}>
+        <View style={styles.tipCard}>
+          <View style={styles.tip}>
+            <Ionicons name="information-circle" size={20} color={tintColor} />
+            <ThemedText style={styles.tipText}>
+              We search Lazada and Shopee together and sort results by lowest price. Try brand, model, or category keywords.
+            </ThemedText>
+          </View>
+        </View>
       </Animated.View>
+    </Animated.View>
+  );
 
-      <Animated.View entering={FadeInUp.delay(600).springify()}>
-        <Button
-          title="Enter Manually"
-          onPress={handleManualEntry}
-          variant="outline"
-        />
-      </Animated.View>
-
-      <Animated.View entering={FadeInUp.delay(700)}>
-        <ThemedText style={styles.storesTitle}>Popular Stores</ThemedText>
-      </Animated.View>
-      <View style={styles.storesGrid}>
-        {commonStores.map((store, index) => (
-          <Animated.View
-            key={index}
-            entering={FadeInUp.delay(750 + index * 50).springify()}
-            style={{ width: '48%' }}
-          >
-            <Card style={styles.storeCard} pressable>
-              <ThemedText style={styles.storeName}>{store.name}</ThemedText>
-            </Card>
-          </Animated.View>
-        ))}
+  const renderSelectionStep = () => (
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      exiting={FadeOut.duration(200)}
+    >
+      <View style={styles.header}>
+        <TouchableOpacity onPress={handleBackToSearch} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={tintColor} />
+        </TouchableOpacity>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.headerTitle}>
+          <ThemedText style={styles.title}>Select Product</ThemedText>
+        </Animated.View>
+        <View style={{ width: 40 }} />
       </View>
+
+      <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+        <ThemedText style={styles.subtitle}>
+          Found {scrapedProducts.length} products for "{searchQuery}" (Lazada & Shopee, sorted by price)
+        </ThemedText>
+      </Animated.View>
+
+      {loading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={tintColor} />
+          <ThemedText style={styles.loadingText}>Loading products...</ThemedText>
+        </View>
+      ) : (
+        <View style={styles.productsGrid}>
+          {scrapedProducts.map((product, index) => (
+            <Animated.View
+              key={index}
+              entering={FadeInUp.delay(100 + index * 50).springify()}
+              style={styles.productCardWrapper}
+            >
+              <TouchableOpacity
+                onPress={() => handleSelectProduct(product)}
+                activeOpacity={0.7}
+              >
+                <Card style={styles.productCard}>
+                  {product.image ? (
+                    <Image
+                      source={{ uri: product.image }}
+                      style={styles.productImage}
+                      resizeMode="cover"
+                    />
+                  ) : (
+                    <View style={[styles.productImage, styles.placeholderImage]}>
+                      <Ionicons name="image-outline" size={40} color={borderColor} />
+                    </View>
+                  )}
+                  <View style={styles.productInfo}>
+                    <ThemedText style={styles.productName} numberOfLines={2}>
+                      {product.name}
+                    </ThemedText>
+                    <ThemedText style={styles.productPrice}>
+                      {formatPrice(product.price)}
+                    </ThemedText>
+                    <View style={styles.storeBadge}>
+                      <Ionicons name="storefront-outline" size={12} color={tintColor} />
+                      <ThemedText style={styles.storeBadgeText}>{product.store}</ThemedText>
+                    </View>
+                    {product.discount && (
+                      <View style={styles.discountBadge}>
+                        <ThemedText style={styles.discountText}>{product.discount}</ThemedText>
+                      </View>
+                    )}
+                    {product.ratings && (
+                      <View style={styles.ratingsContainer}>
+                        <Ionicons name="star" size={12} color="#fbbf24" />
+                        <ThemedText style={styles.ratingsText}>{product.ratings}</ThemedText>
+                        {product.reviews && (
+                          <ThemedText style={styles.reviewsText}>({product.reviews})</ThemedText>
+                        )}
+                      </View>
+                    )}
+                  </View>
+                </Card>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </View>
+      )}
     </Animated.View>
   );
 
@@ -205,31 +311,42 @@ export default function AddProductScreen() {
       exiting={FadeOut.duration(200)}
     >
       <View style={styles.header}>
-        <Animated.View entering={FadeInUp.delay(100).springify()}>
-          <Button
-            title=""
-            icon={<Ionicons name="arrow-back" size={24} color={tintColor} />}
-            onPress={() => setStep('url')}
-            variant="ghost"
-          />
-        </Animated.View>
-        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <TouchableOpacity onPress={handleBackToSelection} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color={tintColor} />
+        </TouchableOpacity>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)} style={styles.headerTitle}>
           <ThemedText style={styles.title}>Product Details</ThemedText>
         </Animated.View>
         <View style={{ width: 40 }} />
       </View>
 
-      {extractedData && (
+      {selectedProduct && (
         <Animated.View entering={FadeInUp.delay(200).springify()}>
-          <Card style={styles.previewCard} delay={0}>
-            <ThemedText style={styles.previewTitle}>Extracted Information</ThemedText>
-            <View style={styles.previewContent}>
-              <ThemedText style={styles.previewLabel}>Name:</ThemedText>
-              <ThemedText style={styles.previewValue}>{extractedData.name}</ThemedText>
-              <ThemedText style={styles.previewLabel}>Price:</ThemedText>
-              <ThemedText style={styles.previewValue}>${extractedData.price}</ThemedText>
-              <ThemedText style={styles.previewLabel}>Store:</ThemedText>
-              <ThemedText style={styles.previewValue}>{extractedData.store}</ThemedText>
+          <Card style={styles.previewCard}>
+            <View style={styles.previewRow}>
+              {selectedProduct.image ? (
+                <Image
+                  source={{ uri: selectedProduct.image }}
+                  style={styles.previewImage}
+                  resizeMode="cover"
+                />
+              ) : (
+                <View style={[styles.previewImage, styles.placeholderImage]}>
+                  <Ionicons name="image-outline" size={30} color={borderColor} />
+                </View>
+              )}
+              <View style={styles.previewInfo}>
+                <ThemedText style={styles.previewName} numberOfLines={2}>
+                  {selectedProduct.name}
+                </ThemedText>
+                <ThemedText style={styles.previewPrice}>
+                  {formatPrice(selectedProduct.price)}
+                </ThemedText>
+                <View style={styles.storeTag}>
+                  <Ionicons name="storefront-outline" size={12} color={tintColor} />
+                    <ThemedText style={styles.storeText}>{selectedProduct.store || 'Lazada'}</ThemedText>
+                </View>
+              </View>
             </View>
           </Card>
         </Animated.View>
@@ -244,31 +361,6 @@ export default function AddProductScreen() {
           leftIcon={<Ionicons name="pricetag" size={20} color={tintColor} />}
         />
       </Animated.View>
-
-      {!extractedData && (
-        <>
-          <Animated.View entering={SlideInUp.delay(350).springify()}>
-            <Input
-              label="Current Price"
-              value={productPrice}
-              onChangeText={setProductPrice}
-              placeholder="299.99"
-              keyboardType="numeric"
-              leftIcon={<Ionicons name="cash" size={20} color={tintColor} />}
-            />
-          </Animated.View>
-
-          <Animated.View entering={SlideInUp.delay(375).springify()}>
-            <Input
-              label="Store"
-              value={productStore}
-              onChangeText={setProductStore}
-              placeholder="Amazon, Best Buy, etc."
-              leftIcon={<Ionicons name="storefront" size={20} color={tintColor} />}
-            />
-          </Animated.View>
-        </>
-      )}
 
       <Animated.View entering={SlideInUp.delay(400).springify()}>
         <Input
@@ -298,10 +390,24 @@ export default function AddProductScreen() {
           onPress={handleAddToWishlist}
           loading={loading}
           style={styles.addButton}
+          icon={!loading ? <Ionicons name="add-circle" size={20} color="#fff" /> : undefined}
         />
       </Animated.View>
     </Animated.View>
   );
+
+  const renderCurrentStep = () => {
+    switch (step) {
+      case 'search':
+        return renderSearchStep();
+      case 'selection':
+        return renderSelectionStep();
+      case 'details':
+        return renderDetailsStep();
+      default:
+        return renderSearchStep();
+    }
+  };
 
   return (
     <ThemedView style={styles.container}>
@@ -315,7 +421,7 @@ export default function AddProductScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {step === 'url' ? renderUrlStep() : renderDetailsStep()}
+          {renderCurrentStep()}
         </ScrollView>
       </KeyboardAvoidingView>
     </ThemedView>
@@ -334,6 +440,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     padding: SIZES.md,
+    paddingBottom: SIZES.xl * 2,
   },
   title: {
     fontSize: 28,
@@ -345,74 +452,170 @@ const styles = StyleSheet.create({
     opacity: 0.7,
     marginBottom: SIZES.xl,
   },
-  extractButton: {
+  searchButton: {
     marginTop: SIZES.md,
   },
-  divider: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginVertical: SIZES.xl,
+    marginBottom: SIZES.lg,
   },
-  line: {
+  headerTitle: {
     flex: 1,
-    height: 1,
+    alignItems: 'center',
   },
-  orText: {
-    marginHorizontal: SIZES.md,
-    fontSize: 14,
+  backButton: {
+    padding: SIZES.sm,
+    marginLeft: -SIZES.sm,
+  },
+  errorContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fef2f2',
+    padding: SIZES.md,
+    borderRadius: 8,
+    marginTop: SIZES.md,
+  },
+  errorText: {
+    color: '#ef4444',
+    marginLeft: SIZES.sm,
+    flex: 1,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: SIZES.xl * 2,
+  },
+  loadingText: {
+    marginTop: SIZES.md,
     opacity: 0.7,
   },
-  storesTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginTop: SIZES.xl,
-    marginBottom: SIZES.md,
-  },
-  storesGrid: {
+  productsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
   },
-  storeCard: {
-    alignItems: 'center',
-    padding: SIZES.md,
-    marginBottom: SIZES.sm,
+  productCardWrapper: {
+    width: '48%',
+    marginBottom: SIZES.md,
   },
-  storeName: {
-    fontSize: 14,
+  productCard: {
+    padding: 0,
+    overflow: 'hidden',
+  },
+  productImage: {
+    width: '100%',
+    height: 120,
+    backgroundColor: '#f5f5f5',
+  },
+  placeholderImage: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  productInfo: {
+    padding: SIZES.sm,
+  },
+  productName: {
+    fontSize: 13,
     fontWeight: '500',
+    marginBottom: SIZES.xs,
+    lineHeight: 18,
   },
-  header: {
+  productPrice: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#f97316',
+    marginBottom: SIZES.xs,
+  },
+  storeBadge: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: SIZES.lg,
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: SIZES.xs,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: SIZES.xs,
+    gap: 4,
+  },
+  storeBadgeText: {
+    fontSize: 11,
+    color: '#2563eb',
+    fontWeight: '600',
+  },
+  discountBadge: {
+    backgroundColor: '#fef3c7',
+    paddingHorizontal: SIZES.xs,
+    paddingVertical: 2,
+    borderRadius: 4,
+    alignSelf: 'flex-start',
+    marginBottom: SIZES.xs,
+  },
+  discountText: {
+    fontSize: 10,
+    color: '#d97706',
+    fontWeight: '600',
+  },
+  ratingsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  ratingsText: {
+    fontSize: 11,
+    marginLeft: 2,
+    color: '#6b7280',
+  },
+  reviewsText: {
+    fontSize: 11,
+    marginLeft: 2,
+    color: '#9ca3af',
   },
   previewCard: {
     marginBottom: SIZES.lg,
-    backgroundColor: '#f0f9ff',
+    padding: SIZES.md,
   },
-  previewTitle: {
-    fontSize: 16,
+  previewRow: {
+    flexDirection: 'row',
+  },
+  previewImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 8,
+    backgroundColor: '#f5f5f5',
+  },
+  previewInfo: {
+    flex: 1,
+    marginLeft: SIZES.md,
+    justifyContent: 'center',
+  },
+  previewName: {
+    fontSize: 14,
     fontWeight: '600',
-    marginBottom: SIZES.sm,
+    marginBottom: SIZES.xs,
   },
-  previewContent: {
-    gap: SIZES.xs,
+  previewPrice: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#f97316',
+    marginBottom: SIZES.xs,
   },
-  previewLabel: {
-    fontSize: 14,
+  storeTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  storeText: {
+    fontSize: 12,
+    marginLeft: 4,
     opacity: 0.7,
-  },
-  previewValue: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   tipCard: {
     marginTop: SIZES.md,
     marginBottom: SIZES.xl,
-    padding: 0,
-    backgroundColor: 'transparent',
+    padding: SIZES.md,
+    backgroundColor: '#eff6ff',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#3b82f6',
   },
   tip: {
     flexDirection: 'row',

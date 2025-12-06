@@ -8,6 +8,10 @@ class Scraper:
     def __init__(self, url: str):
         self.url = url
         self.results: List[Dict] = []
+        self._image_stats = {
+            'valid': 0,
+            'invalid': 0
+        }
 
     async def scrape(self) -> List[Dict]:
         """
@@ -38,13 +42,58 @@ class Scraper:
 
     async def _simulate_scrolling(self, page):
         """
-        Simulates human-like scrolling on the page.
+        Simulates human-like scrolling on the page and waits for lazy-loaded images.
         """
         logging.info("Starting human-like scrolling...")
-        for _ in range(5):
+        
+        # Scroll down the page multiple times to trigger lazy loading
+        for i in range(5):
             await page.evaluate("window.scrollBy(0, document.body.scrollHeight)")
             await page.wait_for_timeout(2000)
-        logging.info("Scrolling complete.")
+        
+        # Scroll back to top to ensure all images in view are loaded
+        await page.evaluate("window.scrollTo(0, 0)")
+        await page.wait_for_timeout(1500)
+        
+        # Scroll down again slowly to trigger any remaining lazy loads
+        for i in range(3):
+            await page.evaluate("window.scrollBy(0, window.innerHeight)")
+            await page.wait_for_timeout(1200)
+        
+        logging.info("Scrolling complete. Waiting for images to load...")
+        
+        # Wait for product images to load (src changes from data: to http)
+        try:
+            await page.wait_for_function("""
+                () => {
+                    const imgs = document.querySelectorAll('img[type="product"]');
+                    if (imgs.length === 0) return true;  // No product images found, continue
+                    const loadedCount = Array.from(imgs).filter(img =>
+                        img.src && img.src.startsWith('http')
+                    ).length;
+                    return loadedCount >= (imgs.length * 0.8);  // At least 80% loaded
+                }
+            """, timeout=20000)
+            logging.info("Images loaded successfully (80%+ threshold reached).")
+        except Exception as e:
+            logging.warning(f"Image loading wait timed out, proceeding anyway: {e}")
+            
+            # Try alternative approach: scroll each product into view
+            try:
+                await page.evaluate("""
+                    () => {
+                        const imgs = document.querySelectorAll('img[type="product"]');
+                        imgs.forEach((img, index) => {
+                            setTimeout(() => {
+                                img.scrollIntoView({ behavior: 'instant', block: 'center' });
+                            }, index * 100);
+                        });
+                    }
+                """)
+                await page.wait_for_timeout(5000)
+                logging.info("Alternative scroll-into-view approach completed.")
+            except Exception as e2:
+                logging.warning(f"Alternative image loading approach failed: {e2}")
 
     def _parse_html(self, html: str) -> List[Dict]:
         """
@@ -53,6 +102,12 @@ class Scraper:
         soup = BeautifulSoup(html, "html.parser")
         products = soup.find_all('div', class_='Bm3ON')
         logging.info(f"Found {len(products)} products. Extracting data...")
+
+        # Reset counters for each parse
+        self._image_stats = {
+            'valid': 0,
+            'invalid': 0
+        }
 
         results = []
         for product in products:
@@ -73,6 +128,9 @@ class Scraper:
 
             results.append(item)
 
+        # Log image extraction summary
+        total_products = self._image_stats['valid'] + self._image_stats['invalid']
+        logging.info(f"Image extraction summary: {self._image_stats['valid']}/{total_products} valid URLs, {self._image_stats['invalid']}/{total_products} invalid/missing")
         logging.info("Data extraction complete.")
         return results
 
@@ -97,11 +155,55 @@ class Scraper:
 
     def _get_image_url(self, element, selector: str) -> str:
         """
-        Extracts the image URL from an element and logs the HTML for debugging.
+        Extracts the image URL from an element, handling lazy-loaded images.
+        Checks multiple attributes in priority order to find valid image URLs.
         """
         tag = element.select_one(selector)
-        if tag:
-            logging.debug(f"Extracted image tag HTML: {tag}")
-            return tag.get('src', 'N/A')
-        logging.warning(f"Image tag not found with selector: {selector}")
+        
+        if not tag:
+            self._image_stats['invalid'] += 1
+            return "N/A"
+        
+        # Priority order for lazy-loaded images
+        attrs_to_check = ['data-src', 'data-lazy-src', 'data-original', 'src']
+        
+        for attr in attrs_to_check:
+            url = tag.get(attr, '')
+            if url and self._is_valid_image_url(url):
+                self._image_stats['valid'] += 1
+                return url
+        
+        self._image_stats['invalid'] += 1
         return "N/A"
+
+    def _is_valid_image_url(self, url: str) -> bool:
+        """
+        Validates if a URL is a valid image URL.
+        Filters out data URIs, empty strings, and placeholder images.
+        """
+        if not url:
+            return False
+        
+        # Skip data URIs (base64 encoded images or placeholders)
+        if url.startswith('data:'):
+            return False
+        
+        # Skip empty or N/A values
+        if url in ('', 'N/A', 'null', 'undefined'):
+            return False
+        
+        # Skip common placeholder patterns
+        placeholder_patterns = [
+            'placeholder',
+            'loading',
+            'blank.gif',
+            'empty.png',
+            '1x1.gif',
+            'pixel.gif'
+        ]
+        url_lower = url.lower()
+        for pattern in placeholder_patterns:
+            if pattern in url_lower:
+                return False
+        
+        return True
