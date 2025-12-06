@@ -46,3 +46,34 @@ export const FONT_SIZES = {
 export const formatPrice = (price: number): string => {
   return `RM ${price.toFixed(2)}`;
 };
+
+/**
+ * Format a date into a short relative string for UI (e.g. "2h ago", "Yesterday").
+ */
+export const formatRelativeTime = (input: string | number | Date): string => {
+  if (!input) return 'Updated just now';
+
+  const date = new Date(input);
+  if (isNaN(date.getTime())) return 'Updated just now';
+
+  const now = new Date();
+  const diffMs = Math.max(0, now.getTime() - date.getTime());
+  const minutes = Math.floor(diffMs / 60000);
+
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  if (days < 7) return `${days}d ago`;
+
+  const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
+  if (date.getFullYear() !== now.getFullYear()) {
+    options.year = 'numeric';
+  }
+
+  return date.toLocaleDateString(undefined, options);
+};

@@ -208,14 +208,14 @@ export default function AddProductScreen() {
       </Animated.View>
 
       <Animated.View entering={FadeIn.delay(500)}>
-        <Card style={styles.tipCard} animated={false}>
+        <View style={styles.tipCard}>
           <View style={styles.tip}>
             <Ionicons name="information-circle" size={20} color={tintColor} />
             <ThemedText style={styles.tipText}>
               We search Lazada and Shopee together and sort results by lowest price. Try brand, model, or category keywords.
             </ThemedText>
           </View>
-        </Card>
+        </View>
       </Animated.View>
     </Animated.View>
   );
@@ -611,8 +611,11 @@ const styles = StyleSheet.create({
   tipCard: {
     marginTop: SIZES.md,
     marginBottom: SIZES.xl,
-    padding: 0,
-    backgroundColor: 'transparent',
+    padding: SIZES.md,
+    backgroundColor: '#eff6ff',
+    borderRadius: 12,
+    borderLeftWidth: 3,
+    borderLeftColor: '#3b82f6',
   },
   tip: {
     flexDirection: 'row',

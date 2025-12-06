@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
-import { SIZES, formatPrice } from '@/utils/constants';
+import { SIZES, formatPrice, formatRelativeTime } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery } from 'convex/react';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -12,6 +12,7 @@ import React from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Linking,
   ScrollView,
   Share,
   StyleSheet,
@@ -82,6 +83,23 @@ export default function ProductDetailScreen() {
     }
   };
 
+  const handleOpenStore = async () => {
+    if (!product.url) {
+      Alert.alert('No link available', 'Store link is missing for this product.');
+      return;
+    }
+    try {
+      const supported = await Linking.canOpenURL(product.url);
+      if (supported) {
+        await Linking.openURL(product.url);
+      } else {
+        Alert.alert('Cannot open link', 'Your device cannot open this store link.');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to open store link');
+    }
+  };
+
   const handleSetAlert = () => {
     Alert.alert(
       'Set Price Alert',
@@ -128,15 +146,40 @@ export default function ProductDetailScreen() {
   const averagePrice = priceHistory.length > 0
     ? priceHistory.reduce((sum: number, p: any) => sum + p.price, 0) / priceHistory.length
     : product.currentPrice;
+  const savingsVsHigh = Math.max(0, highestPrice - product.currentPrice);
+  const marketDelta = product.currentPrice - averagePrice;
+  const trendHint =
+    marketDelta <= -0.05 * averagePrice
+      ? 'Great price vs market'
+      : marketDelta <= 0.05 * averagePrice
+      ? 'Fair price vs market'
+      : 'Above typical price';
+
+  const nextBestTime =
+    product.trend === 'down'
+      ? 'Prices are falling — good time to buy'
+      : product.trend === 'up'
+      ? 'Prices rising — consider waiting for a drop'
+      : 'Stable — buy when you see a small discount';
 
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <Animated.View entering={ZoomIn.delay(100).duration(400)}>
           <Card style={styles.imageCard} delay={0}>
-            <View style={styles.imagePlaceholder}>
-              <Ionicons name="image" size={64} color={borderColor} />
-            </View>
+            {product.image ? (
+              <Animated.Image
+                // @ts-ignore sharedTransitionTag is supported at runtime for Reanimated shared transitions
+                sharedTransitionTag={`product-image-${product._id}`}
+                source={{ uri: product.image }}
+                style={styles.heroImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <View style={styles.imagePlaceholder}>
+                <Ionicons name="image" size={64} color={borderColor} />
+              </View>
+            )}
             {discountPercentage > 0 && (
               <Animated.View
                 entering={FadeIn.delay(400).duration(300)}
@@ -161,6 +204,16 @@ export default function ProductDetailScreen() {
                 variant="ghost"
               />
             </Animated.View>
+            {product.url && (
+              <Animated.View entering={FadeIn.delay(350)}>
+                <Button
+                  title=""
+                  icon={<Ionicons name="open-outline" size={24} color={tintColor} />}
+                  onPress={handleOpenStore}
+                  variant="ghost"
+                />
+              </Animated.View>
+            )}
           </View>
 
           <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.priceRow}>
@@ -179,7 +232,7 @@ export default function ProductDetailScreen() {
             </View>
             <View style={styles.metaItem}>
               <Ionicons name="time-outline" size={20} color={tintColor} />
-              <ThemedText style={styles.metaText}>{product.lastUpdated}</ThemedText>
+              <ThemedText style={styles.metaText}>{formatRelativeTime(product.lastUpdated)}</ThemedText>
             </View>
           </Animated.View>
 
@@ -215,6 +268,40 @@ export default function ProductDetailScreen() {
             </View>
           </Card>
         )}
+
+        <Card style={styles.analyticsCard} delay={300}>
+          <ThemedText style={styles.sectionTitle}>Price Insights</ThemedText>
+          <View style={styles.analyticsRow}>
+            <View style={styles.analyticsItem}>
+              <View style={styles.analyticsLabelRow}>
+                <Ionicons name="trending-down-outline" size={18} color="#16a34a" />
+                <ThemedText style={styles.analyticsLabel}>Vs Market Avg</ThemedText>
+              </View>
+              <ThemedText style={styles.analyticsValue}>
+                {marketDelta < 0 ? '-' : '+'}
+                {formatPrice(Math.abs(marketDelta))}
+              </ThemedText>
+              <ThemedText style={styles.analyticsHint}>{trendHint}</ThemedText>
+            </View>
+            <View style={styles.analyticsItem}>
+              <View style={styles.analyticsLabelRow}>
+                <Ionicons name="pricetag-outline" size={18} color="#f59e0b" />
+                <ThemedText style={styles.analyticsLabel}>Savings vs High</ThemedText>
+              </View>
+              <ThemedText style={styles.analyticsValue}>{formatPrice(savingsVsHigh)}</ThemedText>
+              <ThemedText style={styles.analyticsHint}>Best recorded: {formatPrice(lowestPrice)}</ThemedText>
+            </View>
+          </View>
+          <View style={styles.analyticsRow}>
+            <View style={styles.analyticsItemFull}>
+              <View style={styles.analyticsLabelRow}>
+                <Ionicons name="time-outline" size={18} color={tintColor} />
+                <ThemedText style={styles.analyticsLabel}>Buying Window</ThemedText>
+              </View>
+              <ThemedText style={styles.analyticsHint}>{nextBestTime}</ThemedText>
+            </View>
+          </View>
+        </Card>
 
         {/* Description & Actions Section */}
         {product.description && (
@@ -293,6 +380,11 @@ const styles = StyleSheet.create({
     height: 250,
     position: 'relative',
     overflow: 'hidden',
+  },
+  heroImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 12,
   },
   imagePlaceholder: {
     flex: 1,
@@ -380,6 +472,44 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     marginBottom: SIZES.md,
+  },
+  analyticsCard: {
+    marginHorizontal: SIZES.md,
+    marginBottom: SIZES.md,
+    paddingBottom: SIZES.md,
+  },
+  analyticsRow: {
+    flexDirection: 'row',
+    gap: SIZES.md,
+    marginTop: SIZES.sm,
+    flexWrap: 'wrap',
+  },
+  analyticsItem: {
+    flex: 1,
+    minWidth: '45%',
+  },
+  analyticsItemFull: {
+    flex: 1,
+  },
+  analyticsLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.xs,
+    marginBottom: 4,
+  },
+  analyticsLabel: {
+    fontSize: 13,
+    opacity: 0.8,
+    fontWeight: '600',
+  },
+  analyticsValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  analyticsHint: {
+    fontSize: 13,
+    opacity: 0.75,
   },
   statsRow: {
     flexDirection: 'row',
