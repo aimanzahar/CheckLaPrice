@@ -8,8 +8,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
 import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
 import { Button } from '@/components/ui/Button';

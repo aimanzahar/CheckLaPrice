@@ -6,8 +6,7 @@ import {
   RefreshControl,
   SegmentedControl,
 } from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
 import { AlertCard } from '@/components/ui/AlertCard';
 import { Card } from '@/components/ui/Card';
 import { SIZES } from '@/utils/constants';

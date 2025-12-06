@@ -1,7 +1,7 @@
 import { ConvexProvider } from "convex/react";
 import { ConvexReactClient } from "convex/react";
 import { ReactNode, useEffect, useState } from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
 
@@ -10,6 +10,7 @@ interface ConvexStatusProviderProps {
 }
 
 export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
+  const [isConnecting, setIsConnecting] = useState<boolean>(true);
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [client] = useState(() => new ConvexReactClient(convexUrl!));
 
@@ -30,6 +31,9 @@ export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
       shadowOpacity: 0.25,
       shadowRadius: 3.84,
       elevation: 5,
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
     },
     statusText: {
       color: "white",
@@ -42,25 +46,34 @@ export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
     // Check if URL is configured
     if (!convexUrl) {
       console.error("EXPO_PUBLIC_CONVEX_URL is not configured");
+      setIsConnecting(false);
       setIsConnected(false);
       return;
     }
 
-    // Simple connection check - if we can create the client, assume connection
-    // The actual connection will be established when needed
-    setIsConnected(true);
+    // Simulate connection check with a delay
+    const connectionTimer = setTimeout(() => {
+      // The actual connection will be established when needed
+      setIsConnecting(false);
+      setIsConnected(true);
+      console.log("Convex client initialized with URL:", convexUrl);
+    }, 2000); // Show connecting status for 2 seconds
 
-    console.log("Convex client initialized with URL:", convexUrl);
+    return () => clearTimeout(connectionTimer);
   }, []);
 
   return (
     <ConvexProvider client={client}>
       {children}
-      {isConnected ? (
-        <View style={[styles.statusContainer, { backgroundColor: "#4CAF50" }]}>
-          <Text style={styles.statusText}>Convex Connected</Text>
+      {/* Only show when connecting */}
+      {isConnecting && (
+        <View style={[styles.statusContainer, { backgroundColor: "#2196F3" }]}>
+          <ActivityIndicator size="small" color="white" />
+          <Text style={styles.statusText}>Connecting to Convex...</Text>
         </View>
-      ) : (
+      )}
+      {/* Show error only if not configured */}
+      {!convexUrl && (
         <View style={[styles.statusContainer, { backgroundColor: "#f44336" }]}>
           <Text style={styles.statusText}>Convex Not Configured</Text>
         </View>
