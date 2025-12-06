@@ -1,13 +1,13 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, DefaultTheme, ThemeProvider as NavigationThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
 import { ConvexStatusProvider } from '@/providers/ConvexProvider';
+import { ThemeProvider, useTheme } from '@/providers/ThemeProvider';
 
 export {
     // Catch any errors thrown by the Layout component.
@@ -43,58 +43,69 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+    <ConvexStatusProvider>
+      <ThemeProvider>
+        <RootLayoutNav />
+      </ThemeProvider>
+    </ConvexStatusProvider>
+  );
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
+  const { isDark } = useTheme();
 
   return (
-    <ConvexStatusProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack
-          screenOptions={{
-            animation: 'slide_from_right',
-            animationDuration: 300,
-            gestureEnabled: true,
-            gestureDirection: 'horizontal',
+    <NavigationThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
+      <Stack
+        screenOptions={{
+          animation: 'slide_from_right',
+          animationDuration: 300,
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="modal"
+          options={{
+            presentation: 'modal',
+            animation: 'slide_from_bottom',
+            animationDuration: 350,
           }}
-        >
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="modal"
-            options={{
-              presentation: 'modal',
-              animation: 'slide_from_bottom',
-              animationDuration: 350,
-            }}
-          />
-          <Stack.Screen
-            name="add-product"
-            options={{
-              title: 'Add Product',
-              animation: 'slide_from_bottom',
-              animationDuration: 300,
-              presentation: 'modal',
-            }}
-          />
-          <Stack.Screen
-            name="alerts"
-            options={{
-              title: 'Alerts',
-              animation: 'slide_from_right',
-            }}
-          />
-          <Stack.Screen
-            name="product/[id]"
-            options={{
-              title: 'Product Details',
-              animation: 'slide_from_right',
-              animationDuration: 250,
-            }}
-          />
-        </Stack>
-      </ThemeProvider>
-    </ConvexStatusProvider>
+        />
+        <Stack.Screen
+          name="add-product"
+          options={{
+            title: 'Add Product',
+            animation: 'slide_from_bottom',
+            animationDuration: 300,
+            presentation: 'modal',
+          }}
+        />
+        <Stack.Screen
+          name="alerts"
+          options={{
+            title: 'Alerts',
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
+          name="product/[id]"
+          options={{
+            title: 'Product Details',
+            animation: 'slide_from_right',
+            animationDuration: 250,
+          }}
+        />
+        <Stack.Screen
+          name="settings"
+          options={{
+            title: 'Settings',
+            animation: 'slide_from_right',
+          }}
+        />
+      </Stack>
+    </NavigationThemeProvider>
   );
 }

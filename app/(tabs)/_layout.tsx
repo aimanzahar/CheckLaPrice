@@ -4,8 +4,8 @@ import React from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
 import { useClientOnlyValue } from '@/components/useClientOnlyValue';
-import { useColorScheme } from '@/components/useColorScheme';
 import Colors from '@/constants/Colors';
+import { useAppColorScheme } from '@/providers/ThemeProvider';
 
 function TabBarIcon(props: {
   name: React.ComponentProps<typeof Ionicons>['name'];
@@ -23,7 +23,7 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useAppColorScheme();
 
   return (
     <Tabs
@@ -43,19 +43,47 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="home" color={color} focused={focused} />
           ),
-          headerRight: () => (
-            <Link href="/add-product" asChild>
+          headerLeft: () => (
+            <Link href="/settings" asChild>
               <Pressable>
                 {({ pressed }) => (
                   <Ionicons
-                    name="add-circle"
-                    size={28}
+                    name="settings-outline"
+                    size={24}
                     color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                    style={{ marginLeft: 15, opacity: pressed ? 0.5 : 1 }}
                   />
                 )}
               </Pressable>
             </Link>
+          ),
+          headerRight: () => (
+            <View style={styles.headerRight}>
+              <Link href="/alerts" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <Ionicons
+                      name="notifications-outline"
+                      size={24}
+                      color={Colors[colorScheme ?? 'light'].text}
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+              <Link href="/add-product" asChild>
+                <Pressable>
+                  {({ pressed }) => (
+                    <Ionicons
+                      name="add-circle"
+                      size={28}
+                      color={Colors[colorScheme ?? 'light'].text}
+                      style={{ opacity: pressed ? 0.5 : 1 }}
+                    />
+                  )}
+                </Pressable>
+              </Link>
+            </View>
           ),
         }}
       />
@@ -65,6 +93,20 @@ export default function TabLayout() {
           title: 'Analysis',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="analytics" color={color} focused={focused} />
+          ),
+          headerRight: () => (
+            <Link href="/settings" asChild>
+              <Pressable>
+                {({ pressed }) => (
+                  <Ionicons
+                    name="settings-outline"
+                    size={24}
+                    color={Colors[colorScheme ?? 'light'].text}
+                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
+                  />
+                )}
+              </Pressable>
+            </Link>
           ),
         }}
       />
@@ -83,6 +125,12 @@ const styles = StyleSheet.create({
     width: 4,
     height: 4,
     borderRadius: 2,
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginRight: 15,
   },
   tabBar: {
     paddingTop: 8,

@@ -26,12 +26,13 @@ export default function AddProductScreen() {
   const { url } = useLocalSearchParams<{ url?: string }>();
   const [productUrl, setProductUrl] = useState(url || '');
   const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productStore, setProductStore] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'url' | 'details'>('url');
   const [extractedData, setExtractedData] = useState<any>(null);
 
-  const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
 
@@ -50,19 +51,20 @@ export default function AddProductScreen() {
 
     setLoading(true);
     try {
-      // TODO: Implement actual product extraction API call
+      // Simulate product extraction
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Mock extracted data
-      setExtractedData({
-        name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
-        price: 279.99,
-        image: 'https://via.placeholder.com/300',
+      const mockData = {
+        name: 'Sample Product from URL',
+        price: 99.99,
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
         store: 'Amazon',
-        description: 'Industry-leading noise canceling with Dual Noise Sensor technology',
-      });
+        description: 'A great product extracted from the URL',
+      };
 
-      setProductName(extractedData.name);
+      setExtractedData(mockData);
+      setProductName(mockData.name);
       setStep('details');
     } catch (error) {
       Alert.alert('Error', 'Failed to extract product information. Please try again.');
@@ -81,9 +83,15 @@ export default function AddProductScreen() {
       return;
     }
 
+    const price = extractedData?.price || parseFloat(productPrice) || 0;
+    if (price <= 0) {
+      Alert.alert('Error', 'Please enter a valid price');
+      return;
+    }
+
     setLoading(true);
     try {
-      // TODO: Implement actual API call to save product
+      // Simulate saving (in a real app, this would save to Convex)
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       Alert.alert(
@@ -97,6 +105,7 @@ export default function AddProductScreen() {
         ]
       );
     } catch (error) {
+      console.error('Error adding product:', error);
       Alert.alert('Error', 'Failed to add product. Please try again.');
     } finally {
       setLoading(false);
@@ -104,7 +113,7 @@ export default function AddProductScreen() {
   };
 
   const renderUrlStep = () => (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.duration(300)}
       exiting={FadeOut.duration(200)}
     >
@@ -217,14 +226,39 @@ export default function AddProductScreen() {
         />
       </Animated.View>
 
+      {!extractedData && (
+        <>
+          <Animated.View entering={SlideInUp.delay(350).springify()}>
+            <Input
+              label="Current Price"
+              value={productPrice}
+              onChangeText={setProductPrice}
+              placeholder="299.99"
+              keyboardType="numeric"
+              leftIcon={<Ionicons name="cash" size={20} color={tintColor} />}
+            />
+          </Animated.View>
+
+          <Animated.View entering={SlideInUp.delay(375).springify()}>
+            <Input
+              label="Store"
+              value={productStore}
+              onChangeText={setProductStore}
+              placeholder="Amazon, Best Buy, etc."
+              leftIcon={<Ionicons name="storefront" size={20} color={tintColor} />}
+            />
+          </Animated.View>
+        </>
+      )}
+
       <Animated.View entering={SlideInUp.delay(400).springify()}>
         <Input
           label="Target Price (Optional)"
           value={targetPrice}
           onChangeText={setTargetPrice}
-          placeholder="100.00"
+          placeholder="Alert me when price drops to..."
           keyboardType="numeric"
-          leftIcon={<Ionicons name="cash" size={20} color={tintColor} />}
+          leftIcon={<Ionicons name="notifications" size={20} color={tintColor} />}
         />
       </Animated.View>
 

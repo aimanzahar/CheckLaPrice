@@ -1,7 +1,6 @@
-import { ConvexProvider } from "convex/react";
-import { ConvexReactClient } from "convex/react";
+import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode, useEffect, useState } from "react";
-import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 const convexUrl = process.env.EXPO_PUBLIC_CONVEX_URL;
 
@@ -10,9 +9,16 @@ interface ConvexStatusProviderProps {
 }
 
 export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
-  const [isConnecting, setIsConnecting] = useState<boolean>(true);
+  const [isConnecting, setIsConnecting] = useState<boolean>(!!convexUrl);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [client] = useState(() => new ConvexReactClient(convexUrl!));
+  
+  // Only create client if URL is configured
+  const [client] = useState(() => {
+    if (convexUrl) {
+      return new ConvexReactClient(convexUrl);
+    }
+    return null;
+  });
 
   const styles = StyleSheet.create({
     statusContainer: {
@@ -45,7 +51,7 @@ export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
   useEffect(() => {
     // Check if URL is configured
     if (!convexUrl) {
-      console.error("EXPO_PUBLIC_CONVEX_URL is not configured");
+      console.log("EXPO_PUBLIC_CONVEX_URL is not configured - running in offline mode");
       setIsConnecting(false);
       setIsConnected(false);
       return;
@@ -53,14 +59,18 @@ export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
 
     // Simulate connection check with a delay
     const connectionTimer = setTimeout(() => {
-      // The actual connection will be established when needed
       setIsConnecting(false);
       setIsConnected(true);
       console.log("Convex client initialized with URL:", convexUrl);
-    }, 2000); // Show connecting status for 2 seconds
+    }, 2000);
 
     return () => clearTimeout(connectionTimer);
   }, []);
+
+  // If Convex is not configured, just render children without the provider
+  if (!client) {
+    return <>{children}</>;
+  }
 
   return (
     <ConvexProvider client={client}>
@@ -70,12 +80,6 @@ export function ConvexStatusProvider({ children }: ConvexStatusProviderProps) {
         <View style={[styles.statusContainer, { backgroundColor: "#2196F3" }]}>
           <ActivityIndicator size="small" color="white" />
           <Text style={styles.statusText}>Connecting to Convex...</Text>
-        </View>
-      )}
-      {/* Show error only if not configured */}
-      {!convexUrl && (
-        <View style={[styles.statusContainer, { backgroundColor: "#f44336" }]}>
-          <Text style={styles.statusText}>Convex Not Configured</Text>
         </View>
       )}
     </ConvexProvider>

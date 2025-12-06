@@ -17,17 +17,17 @@ import Animated, {
     FadeIn,
     FadeInDown,
     FadeInUp,
-    SlideInUp
+    SlideInUp,
 } from 'react-native-reanimated';
 
-// Mock data - replace with actual API calls
-const mockProducts = [
+// Sample products for demo
+const sampleProducts = [
   {
     id: '1',
     name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
     currentPrice: 279.99,
     originalPrice: 349.99,
-    image: 'https://via.placeholder.com/150',
+    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=300',
     store: 'Amazon',
     priceChange: -15.50,
     trend: 'down' as const,
@@ -37,7 +37,8 @@ const mockProducts = [
     id: '2',
     name: 'Apple iPad Air (5th Generation)',
     currentPrice: 599.00,
-    image: 'https://via.placeholder.com/150',
+    originalPrice: 599.00,
+    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300',
     store: 'Best Buy',
     priceChange: 0,
     trend: 'stable' as const,
@@ -48,25 +49,44 @@ const mockProducts = [
     name: 'Samsung 65-inch 4K Smart TV',
     currentPrice: 899.99,
     originalPrice: 1099.99,
-    image: 'https://via.placeholder.com/150',
+    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300',
     store: 'Target',
     priceChange: 25.00,
     trend: 'up' as const,
     lastUpdated: '3 hours ago',
   },
+  {
+    id: '4',
+    name: 'Nintendo Switch OLED Model',
+    currentPrice: 349.99,
+    originalPrice: 349.99,
+    image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=300',
+    store: 'Walmart',
+    priceChange: -10.00,
+    trend: 'down' as const,
+    lastUpdated: '5 hours ago',
+  },
+  {
+    id: '5',
+    name: 'Dyson V15 Detect Cordless Vacuum',
+    currentPrice: 649.99,
+    originalPrice: 749.99,
+    image: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300',
+    store: 'Amazon',
+    priceChange: -50.00,
+    trend: 'down' as const,
+    lastUpdated: '30 minutes ago',
+  },
 ];
 
 export default function HomeScreen() {
-  const [products, setProducts] = useState(mockProducts);
+  const [products, setProducts] = useState(sampleProducts);
   const [refreshing, setRefreshing] = useState(false);
-  const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
-  const backgroundColor = useThemeColor({ light: '#f8f8f8', dark: '#1a1a1a' }, 'background');
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Fetch latest prices from API
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     setRefreshing(false);
   };
 
@@ -92,7 +112,7 @@ export default function HomeScreen() {
   };
 
   const renderEmptyState = () => (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.delay(200).duration(400)}
       style={styles.emptyState}
     >

@@ -1,26 +1,22 @@
 import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
 import { AlertCard } from '@/components/ui/AlertCard';
-import { Card } from '@/components/ui/Card';
 import { SIZES } from '@/utils/constants';
 import React, { useState } from 'react';
 import {
     FlatList,
     Pressable,
     RefreshControl,
-    SegmentedControl,
     StyleSheet,
     View,
 } from 'react-native';
 import Animated, {
     FadeIn,
     FadeInDown,
-    FadeInUp
+    FadeInUp,
 } from 'react-native-reanimated';
 
-const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
-
-// Mock alerts data
-const mockAlerts = [
+// Sample alerts for demo
+const sampleAlerts = [
   {
     id: '1',
     type: 'price_drop' as const,
@@ -62,32 +58,28 @@ const mockAlerts = [
     type: 'price_drop' as const,
     title: 'Back in Stock - Price Drop',
     message: 'Previously out-of-stock item is now available with 10% discount.',
-    productName: 'Nintendo Switch - Red Box',
+    productName: 'Nintendo Switch OLED',
     timestamp: '2 days ago',
     read: true,
   },
 ];
 
 export default function AlertsScreen() {
-  const [alerts, setAlerts] = useState(mockAlerts);
+  const [alerts, setAlerts] = useState(sampleAlerts);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const tintColor = useThemeColor({}, 'tint');
+  const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333' }, 'border');
 
   const filterOptions = ['All', 'Unread', 'Price Drops', 'News'];
 
   const filteredAlerts = alerts.filter(alert => {
     switch (selectedIndex) {
-      case 0: // All
-        return true;
-      case 1: // Unread
-        return !alert.read;
-      case 2: // Price Drops
-        return alert.type === 'price_drop';
-      case 3: // News
-        return alert.type === 'news_alert' || alert.type === 'trend_warning';
-      default:
-        return true;
+      case 0: return true;
+      case 1: return !alert.read;
+      case 2: return alert.type === 'price_drop';
+      case 3: return alert.type === 'news_alert' || alert.type === 'trend_warning';
+      default: return true;
     }
   });
 
@@ -95,33 +87,28 @@ export default function AlertsScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // TODO: Fetch latest alerts from API
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 500));
     setRefreshing(false);
   };
 
   const handleAlertPress = (alertId: string) => {
-    setAlerts(prev =>
-      prev.map(alert =>
-        alert.id === alertId ? { ...alert, read: true } : alert
-      )
-    );
+    setAlerts(prev => prev.map(a => 
+      a.id === alertId ? { ...a, read: true } : a
+    ));
   };
 
   const handleMarkAsRead = (alertId: string) => {
-    setAlerts(prev =>
-      prev.map(alert =>
-        alert.id === alertId ? { ...alert, read: true } : alert
-      )
-    );
+    setAlerts(prev => prev.map(a => 
+      a.id === alertId ? { ...a, read: true } : a
+    ));
   };
 
   const handleDeleteAlert = (alertId: string) => {
-    setAlerts(prev => prev.filter(alert => alert.id !== alertId));
+    setAlerts(prev => prev.filter(a => a.id !== alertId));
   };
 
   const handleMarkAllAsRead = () => {
-    setAlerts(prev => prev.map(alert => ({ ...alert, read: true })));
+    setAlerts(prev => prev.map(a => ({ ...a, read: true })));
   };
 
   const renderHeader = () => (
@@ -132,28 +119,43 @@ export default function AlertsScreen() {
         </ThemedText>
       </Animated.View>
       <Animated.View entering={FadeIn.delay(200).duration(300)}>
-        <SegmentedControl
-          values={filterOptions}
-          selectedIndex={selectedIndex}
-          onChange={e => setSelectedIndex(e.nativeEvent.selectedSegmentIndex)}
-          tintColor={tintColor}
-          style={styles.segmentedControl}
-        />
+        <View style={styles.filterRow}>
+          {filterOptions.map((option, index) => (
+            <Pressable
+              key={option}
+              style={[
+                styles.filterButton,
+                selectedIndex === index && { backgroundColor: tintColor },
+                { borderColor: selectedIndex === index ? tintColor : borderColor },
+              ]}
+              onPress={() => setSelectedIndex(index)}
+            >
+              <ThemedText
+                style={[
+                  styles.filterText,
+                  selectedIndex === index && { color: '#fff' },
+                ]}
+              >
+                {option}
+              </ThemedText>
+            </Pressable>
+          ))}
+        </View>
       </Animated.View>
       {unreadCount > 0 && (
         <Animated.View entering={FadeIn.delay(300)}>
-          <Card style={styles.markAllCard} animated={false}>
-            <ThemedText onPress={handleMarkAllAsRead} style={styles.markAllText}>
+          <Pressable onPress={handleMarkAllAsRead}>
+            <ThemedText style={[styles.markAllText, { color: tintColor }]}>
               Mark all as read
             </ThemedText>
-          </Card>
+          </Pressable>
         </Animated.View>
       )}
     </View>
   );
 
   const renderEmptyState = () => (
-    <Animated.View 
+    <Animated.View
       entering={FadeIn.delay(200).duration(400)}
       style={styles.emptyState}
     >
@@ -209,18 +211,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: SIZES.md,
   },
-  segmentedControl: {
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: SIZES.xs,
     marginBottom: SIZES.md,
   },
-  markAllCard: {
-    alignItems: 'flex-end',
-    backgroundColor: 'transparent',
-    padding: 0,
+  filterButton: {
+    paddingHorizontal: SIZES.md,
+    paddingVertical: SIZES.xs,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   markAllText: {
     fontSize: 14,
-    color: '#007AFF',
     fontWeight: '500',
+    textAlign: 'right',
   },
   list: {
     paddingHorizontal: SIZES.md,
