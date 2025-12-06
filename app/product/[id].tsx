@@ -2,11 +2,15 @@ import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/compone
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
+import { api } from '@/convex/_generated/api';
+import { Id } from '@/convex/_generated/dataModel';
 import { SIZES } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
+import { useMutation, useQuery } from 'convex/react';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
+    ActivityIndicator,
     Alert,
     ScrollView,
     Share,
@@ -20,108 +24,30 @@ import Animated, {
     ZoomIn
 } from 'react-native-reanimated';
 
-// Sample products for demo
-const sampleProducts: Record<string, any> = {
-  '1': {
-    id: '1',
-    name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
-    currentPrice: 279.99,
-    originalPrice: 349.99,
-    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=300',
-    store: 'Amazon',
-    description: 'Industry-leading noise canceling with Dual Noise Sensor technology. Next-level music with Edge-AI and DSEE Extreme. Crystal-clear hands-free calling with precise voice pickup.',
-    url: 'https://www.amazon.com/dp/B0863TXGM3',
-    priceChange: -15.50,
-    trend: 'down',
-    lastUpdated: '2 hours ago',
-    targetPrice: 250,
-    priceHistory: [
-      { date: '2024-01-01', price: 349.99 },
-      { date: '2024-01-02', price: 329.99 },
-      { date: '2024-01-03', price: 319.99 },
-      { date: '2024-01-04', price: 299.99 },
-      { date: '2024-01-05', price: 289.99 },
-      { date: '2024-01-06', price: 279.99 },
-      { date: '2024-01-07', price: 279.99 },
-    ],
-  },
-  '2': {
-    id: '2',
-    name: 'Apple iPad Air (5th Generation)',
-    currentPrice: 599.00,
-    originalPrice: 599.00,
-    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300',
-    store: 'Best Buy',
-    description: '10.9-inch Liquid Retina display with True Tone. Apple M1 chip with Neural Engine for next-level performance.',
-    priceChange: 0,
-    trend: 'stable',
-    lastUpdated: '1 hour ago',
-    priceHistory: [
-      { date: '2024-01-01', price: 599.00 },
-      { date: '2024-01-07', price: 599.00 },
-    ],
-  },
-  '3': {
-    id: '3',
-    name: 'Samsung 65-inch 4K Smart TV',
-    currentPrice: 899.99,
-    originalPrice: 1099.99,
-    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300',
-    store: 'Target',
-    description: 'Crystal UHD 4K Smart TV with HDR. Built-in Alexa and smart home control. AirSlim design.',
-    priceChange: 25.00,
-    trend: 'up',
-    lastUpdated: '3 hours ago',
-    targetPrice: 800,
-    priceHistory: [
-      { date: '2024-01-01', price: 849.99 },
-      { date: '2024-01-04', price: 874.99 },
-      { date: '2024-01-07', price: 899.99 },
-    ],
-  },
-  '4': {
-    id: '4',
-    name: 'Nintendo Switch OLED Model',
-    currentPrice: 349.99,
-    originalPrice: 349.99,
-    image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=300',
-    store: 'Walmart',
-    description: '7-inch OLED screen with vibrant colors. Enhanced audio and 64 GB internal storage.',
-    priceChange: -10.00,
-    trend: 'down',
-    lastUpdated: '5 hours ago',
-    priceHistory: [
-      { date: '2024-01-01', price: 359.99 },
-      { date: '2024-01-07', price: 349.99 },
-    ],
-  },
-  '5': {
-    id: '5',
-    name: 'Dyson V15 Detect Cordless Vacuum',
-    currentPrice: 649.99,
-    originalPrice: 749.99,
-    image: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300',
-    store: 'Amazon',
-    description: 'Laser reveals microscopic dust. Piezo sensor measures and counts dust particles.',
-    priceChange: -50.00,
-    trend: 'down',
-    lastUpdated: '30 minutes ago',
-    targetPrice: 600,
-    priceHistory: [
-      { date: '2024-01-01', price: 699.99 },
-      { date: '2024-01-04', price: 699.99 },
-      { date: '2024-01-07', price: 649.99 },
-    ],
-  },
-};
-
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const product = sampleProducts[id || '1'];
+  
+  // Fetch product from Convex
+  const product = useQuery(
+    api.products.get, 
+    id ? { id: id as Id<"products"> } : "skip"
+  );
+  const removeProduct = useMutation(api.products.remove);
 
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
 
+  // Loading state
+  if (product === undefined) {
+    return (
+      <ThemedView style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color={tintColor} />
+        <ThemedText style={styles.loadingText}>Loading product...</ThemedText>
+      </ThemedView>
+    );
+  }
+
+  // Not found state
   if (!product) {
     return (
       <ThemedView style={[styles.container, styles.loadingContainer]}>
@@ -176,7 +102,14 @@ export default function ProductDetailScreen() {
         {
           text: 'Remove',
           style: 'destructive',
-          onPress: () => router.back(),
+          onPress: async () => {
+            try {
+              await removeProduct({ id: product._id });
+              router.back();
+            } catch (error) {
+              Alert.alert('Error', 'Failed to remove product');
+            }
+          },
         },
       ]
     );
@@ -344,6 +277,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     gap: SIZES.md,
+  },
+  loadingText: {
+    marginTop: SIZES.md,
+    fontSize: 16,
+    opacity: 0.7,
   },
   notFoundText: {
     fontSize: 18,

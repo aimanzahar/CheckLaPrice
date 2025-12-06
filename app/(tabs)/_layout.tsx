@@ -39,9 +39,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Wishlist',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="home" color={color} focused={focused} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="wishlist"
+        options={{
+          title: 'Wishlist',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="heart" color={color} focused={focused} />
           ),
           headerLeft: () => (
             <Link href="/settings" asChild>
