@@ -1,189 +1,284 @@
 import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
-import { ProductCard } from '@/components/ui/ProductCard';
 import { SIZES } from '@/utils/constants';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
-import React, { useState } from 'react';
-import {
-    Alert,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    View,
-} from 'react-native';
+import React from 'react';
+import { Dimensions, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import Animated, {
-    FadeIn,
-    FadeInDown,
-    FadeInUp,
-    SlideInUp,
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  SlideInRight,
 } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-// Sample products for demo
-const sampleProducts = [
-  {
-    id: '1',
-    name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
-    currentPrice: 279.99,
-    originalPrice: 349.99,
-    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=300',
-    store: 'Amazon',
-    priceChange: -15.50,
-    trend: 'down' as const,
-    lastUpdated: '2 hours ago',
-  },
-  {
-    id: '2',
-    name: 'Apple iPad Air (5th Generation)',
-    currentPrice: 599.00,
-    originalPrice: 599.00,
-    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300',
-    store: 'Best Buy',
-    priceChange: 0,
-    trend: 'stable' as const,
-    lastUpdated: '1 hour ago',
-  },
-  {
-    id: '3',
-    name: 'Samsung 65-inch 4K Smart TV',
-    currentPrice: 899.99,
-    originalPrice: 1099.99,
-    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300',
-    store: 'Target',
-    priceChange: 25.00,
-    trend: 'up' as const,
-    lastUpdated: '3 hours ago',
-  },
-  {
-    id: '4',
-    name: 'Nintendo Switch OLED Model',
-    currentPrice: 349.99,
-    originalPrice: 349.99,
-    image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=300',
-    store: 'Walmart',
-    priceChange: -10.00,
-    trend: 'down' as const,
-    lastUpdated: '5 hours ago',
-  },
-  {
-    id: '5',
-    name: 'Dyson V15 Detect Cordless Vacuum',
-    currentPrice: 649.99,
-    originalPrice: 749.99,
-    image: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300',
-    store: 'Amazon',
-    priceChange: -50.00,
-    trend: 'down' as const,
-    lastUpdated: '30 minutes ago',
-  },
-];
+const { width } = Dimensions.get('window');
 
-export default function HomeScreen() {
-  const [products, setProducts] = useState(sampleProducts);
-  const [refreshing, setRefreshing] = useState(false);
-  const tintColor = useThemeColor({}, 'tint');
+interface FeatureCardProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  title: string;
+  description: string;
+  delay: number;
+  color: string;
+}
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setRefreshing(false);
-  };
-
-  const handleProductPress = (productId: string) => {
-    router.push(`/product/${productId}`);
-  };
-
-  const handleDeleteProduct = (productId: string) => {
-    Alert.alert(
-      'Remove from Wishlist',
-      'Are you sure you want to remove this item from your wishlist?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Remove',
-          style: 'destructive',
-          onPress: () => {
-            setProducts(prev => prev.filter(p => p.id !== productId));
-          },
-        },
-      ]
-    );
-  };
-
-  const renderEmptyState = () => (
-    <Animated.View
-      entering={FadeIn.delay(200).duration(400)}
-      style={styles.emptyState}
-    >
-      <Animated.View entering={FadeInUp.delay(300).springify()}>
-        <Ionicons name="pricetag-outline" size={64} color={tintColor} />
-      </Animated.View>
-      <Animated.View entering={FadeInUp.delay(400).springify()}>
-        <ThemedText style={styles.emptyTitle}>Track Your First Product</ThemedText>
-      </Animated.View>
-      <Animated.View entering={FadeInUp.delay(500).springify()}>
-        <ThemedText style={styles.emptyMessage}>
-          Add products to your wishlist and we'll monitor prices for you
+const FeatureCard = ({ icon, title, description, delay, color }: FeatureCardProps) => {
+  const textColor = useThemeColor({}, 'text');
+  
+  return (
+    <Animated.View entering={SlideInRight.delay(delay).springify()}>
+      <Card style={styles.featureCard} variant="elevated" delay={delay}>
+        <View style={[styles.featureIconContainer, { backgroundColor: color + '20' }]}>
+          <Ionicons name={icon} size={28} color={color} />
+        </View>
+        <ThemedText style={styles.featureTitle}>{title}</ThemedText>
+        <ThemedText style={[styles.featureDescription, { color: textColor + '99' }]}>
+          {description}
         </ThemedText>
-      </Animated.View>
-      <Animated.View entering={SlideInUp.delay(600).springify()}>
-        <Button
-          title="Add Product"
-          onPress={() => router.push('/add-product')}
-          style={styles.addButton}
-        />
-      </Animated.View>
+      </Card>
     </Animated.View>
   );
+};
 
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-        <ThemedText style={styles.title}>My Wishlist</ThemedText>
-      </Animated.View>
-      <View style={styles.statsRow}>
-        <Card style={styles.statCard} delay={150}>
-          <ThemedText style={styles.statNumber}>{products.length}</ThemedText>
-          <ThemedText style={styles.statLabel}>Items</ThemedText>
-        </Card>
-        <Card style={styles.statCard} delay={250}>
-          <ThemedText style={styles.statNumber}>
-            {products.filter(p => p.trend === 'down').length}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>Dropping</ThemedText>
-        </Card>
-        <Card style={styles.statCard} delay={350}>
-          <ThemedText style={styles.statNumber}>
-            ${products.reduce((sum, p) => sum + p.currentPrice, 0).toFixed(0)}
-          </ThemedText>
-          <ThemedText style={styles.statLabel}>Total Value</ThemedText>
-        </Card>
-      </View>
-    </View>
-  );
+export default function HomeScreen() {
+  const insets = useSafeAreaInsets();
+  const tintColor = useThemeColor({}, 'tint');
+  const backgroundColor = useThemeColor({}, 'background');
+  const textColor = useThemeColor({}, 'text');
+
+  const features = [
+    {
+      icon: 'pricetag' as const,
+      title: 'Smart Wishlist',
+      description: 'Add products via URL or manually. Auto-fetch thumbnails, prices & descriptions.',
+      color: '#10B981',
+    },
+    {
+      icon: 'trending-down' as const,
+      title: 'Price Monitoring',
+      description: 'Scheduled price checks with history tracking to detect spikes or drops.',
+      color: '#3B82F6',
+    },
+    {
+      icon: 'newspaper' as const,
+      title: 'News Intelligence',
+      description: 'AI-powered sentiment analysis correlates news with price movements.',
+      color: '#8B5CF6',
+    },
+    {
+      icon: 'notifications' as const,
+      title: 'Smart Alerts',
+      description: 'Get notified on price drops, hikes, and market trend warnings.',
+      color: '#F59E0B',
+    },
+  ];
 
   return (
     <ThemedView style={styles.container}>
-      <FlatList
-        data={products}
-        renderItem={({ item, index }) => (
-          <ProductCard
-            product={item}
-            onPress={() => handleProductPress(item.id)}
-            onDelete={() => handleDeleteProduct(item.id)}
-            index={index}
-          />
-        )}
-        keyExtractor={item => item.id}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyState}
-        contentContainerStyle={products.length === 0 ? styles.emptyList : styles.list}
+      <StatusBar barStyle="dark-content" />
+      <ScrollView
         showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={tintColor} />
-        }
-      />
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingTop: insets.top + SIZES.md }
+        ]}
+      >
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <LinearGradient
+            colors={['#3B82F620', 'transparent']}
+            style={styles.heroGradient}
+          />
+          
+          <Animated.View entering={FadeIn.delay(100).duration(600)}>
+            <View style={styles.logoContainer}>
+              <LinearGradient
+                colors={['#3B82F6', '#8B5CF6']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.logoGradient}
+              >
+                <Ionicons name="pricetag" size={40} color="#fff" />
+              </LinearGradient>
+            </View>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <ThemedText style={styles.appName}>CheckLaPrice</ThemedText>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(300).springify()}>
+            <ThemedText style={styles.tagline}>
+              "Know the Price. Beat the Price."
+            </ThemedText>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(400).springify()}>
+            <ThemedText style={[styles.heroDescription, { color: textColor + 'CC' }]}>
+              A smart price-tracking app that helps you make smarter buying decisions
+            </ThemedText>
+          </Animated.View>
+
+          {/* CTA Buttons */}
+          <Animated.View 
+            entering={FadeInUp.delay(500).springify()}
+            style={styles.ctaContainer}
+          >
+            <Button
+              title="Start Tracking"
+              onPress={() => router.push('/add-product')}
+              size="large"
+              style={styles.primaryCta}
+              icon={<Ionicons name="add-circle-outline" size={22} color="#fff" />}
+            />
+            <Button
+              title="View Wishlist"
+              variant="outline"
+              onPress={() => router.push('/(tabs)/wishlist')}
+              size="large"
+              style={styles.secondaryCta}
+              icon={<Ionicons name="heart-outline" size={22} color={tintColor} />}
+            />
+          </Animated.View>
+        </View>
+
+        {/* Problem Statement */}
+        <View style={styles.section}>
+          <Animated.View entering={FadeInDown.delay(600).springify()}>
+            <Card style={[styles.problemCard, { backgroundColor: '#EF444420' }]} variant="elevated">
+              <View style={styles.problemHeader}>
+                <Ionicons name="help-circle" size={24} color="#EF4444" />
+                <ThemedText style={styles.problemTitle}>The Problem</ThemedText>
+              </View>
+              <View style={styles.problemList}>
+                <View style={styles.problemItem}>
+                  <Ionicons name="close-circle" size={18} color="#EF4444" />
+                  <ThemedText style={styles.problemText}>
+                    Is this a good price or overpriced?
+                  </ThemedText>
+                </View>
+                <View style={styles.problemItem}>
+                  <Ionicons name="close-circle" size={18} color="#EF4444" />
+                  <ThemedText style={styles.problemText}>
+                    Will the price go up or down?
+                  </ThemedText>
+                </View>
+                <View style={styles.problemItem}>
+                  <Ionicons name="close-circle" size={18} color="#EF4444" />
+                  <ThemedText style={styles.problemText}>
+                    Are there events that might affect prices?
+                  </ThemedText>
+                </View>
+              </View>
+            </Card>
+          </Animated.View>
+
+          <Animated.View entering={FadeInDown.delay(700).springify()}>
+            <Card style={[styles.solutionCard, { backgroundColor: '#10B98120' }]} variant="elevated">
+              <View style={styles.problemHeader}>
+                <Ionicons name="checkmark-circle" size={24} color="#10B981" />
+                <ThemedText style={styles.solutionTitle}>Our Solution</ThemedText>
+              </View>
+              <ThemedText style={[styles.solutionText, { color: textColor + 'DD' }]}>
+                CheckLaPrice automates all the research by tracking prices, analyzing news sentiment, and sending alerts so you can buy confidently.
+              </ThemedText>
+            </Card>
+          </Animated.View>
+        </View>
+
+        {/* Features Section */}
+        <View style={styles.section}>
+          <Animated.View entering={FadeInDown.delay(800).springify()}>
+            <ThemedText style={styles.sectionTitle}>Key Features</ThemedText>
+          </Animated.View>
+
+          <View style={styles.featuresGrid}>
+            {features.map((feature, index) => (
+              <FeatureCard
+                key={feature.title}
+                icon={feature.icon}
+                title={feature.title}
+                description={feature.description}
+                delay={900 + index * 100}
+                color={feature.color}
+              />
+            ))}
+          </View>
+        </View>
+
+        {/* How It Works */}
+        <View style={styles.section}>
+          <Animated.View entering={FadeInDown.delay(1300).springify()}>
+            <ThemedText style={styles.sectionTitle}>How It Works</ThemedText>
+          </Animated.View>
+
+          <View style={styles.stepsContainer}>
+            {[
+              { step: '1', title: 'Add Product', desc: 'Paste URL or enter manually', icon: 'add-circle' as const },
+              { step: '2', title: 'We Track', desc: 'Monitor prices & news 24/7', icon: 'eye' as const },
+              { step: '3', title: 'Get Alerted', desc: 'Notified when prices drop', icon: 'notifications' as const },
+              { step: '4', title: 'Save Money', desc: 'Buy at the best price', icon: 'wallet' as const },
+            ].map((item, index) => (
+              <Animated.View
+                key={item.step}
+                entering={FadeInUp.delay(1400 + index * 100).springify()}
+                style={styles.stepItem}
+              >
+                <LinearGradient
+                  colors={['#3B82F6', '#8B5CF6']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.stepNumber}
+                >
+                  <Ionicons name={item.icon} size={20} color="#fff" />
+                </LinearGradient>
+                <ThemedText style={styles.stepTitle}>{item.title}</ThemedText>
+                <ThemedText style={[styles.stepDesc, { color: textColor + '99' }]}>
+                  {item.desc}
+                </ThemedText>
+              </Animated.View>
+            ))}
+          </View>
+        </View>
+
+        {/* Bottom CTA */}
+        <Animated.View 
+          entering={FadeInUp.delay(1800).springify()}
+          style={styles.bottomCta}
+        >
+          <LinearGradient
+            colors={['#3B82F6', '#8B5CF6']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.bottomCtaGradient}
+          >
+            <ThemedText style={styles.bottomCtaTitle}>
+              Ready to Save Money?
+            </ThemedText>
+            <ThemedText style={styles.bottomCtaSubtitle}>
+              Start tracking your first product now
+            </ThemedText>
+            <Button
+              title="Get Started"
+              variant="secondary"
+              onPress={() => router.push('/add-product')}
+              size="large"
+              style={styles.bottomCtaButton}
+              icon={<Ionicons name="rocket" size={20} color="#3B82F6" />}
+            />
+          </LinearGradient>
+        </Animated.View>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <ThemedText style={[styles.footerText, { color: textColor + '60' }]}>
+            Made with ❤️ for smart shoppers
+          </ThemedText>
+        </View>
+      </ScrollView>
     </ThemedView>
   );
 }
@@ -192,61 +287,206 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    padding: SIZES.md,
-    paddingBottom: SIZES.sm,
+  scrollContent: {
+    paddingBottom: SIZES.xl * 2,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+  heroSection: {
+    alignItems: 'center',
+    paddingHorizontal: SIZES.lg,
+    paddingTop: SIZES.lg,
+    paddingBottom: SIZES.xl,
+    position: 'relative',
+  },
+  heroGradient: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 300,
+  },
+  logoContainer: {
     marginBottom: SIZES.md,
   },
-  statsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  statCard: {
-    flex: 1,
+  logoGradient: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
     alignItems: 'center',
-    padding: SIZES.md,
-    marginHorizontal: SIZES.xs / 2,
-    backgroundColor: 'transparent',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  statLabel: {
-    fontSize: 12,
-    marginTop: 4,
-  },
-  list: {
-    paddingHorizontal: SIZES.md,
-    paddingBottom: SIZES.xl,
-  },
-  emptyList: {
-    flexGrow: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: SIZES.xl,
+    shadowColor: '#3B82F6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingHorizontal: SIZES.xl,
-  },
-  emptyTitle: {
-    fontSize: 24,
+  appName: {
+    fontSize: 36,
     fontWeight: 'bold',
-    marginTop: SIZES.lg,
+    textAlign: 'center',
+    marginBottom: SIZES.xs,
+  },
+  tagline: {
+    fontSize: 18,
+    fontWeight: '600',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    opacity: 0.9,
     marginBottom: SIZES.sm,
   },
-  emptyMessage: {
+  heroDescription: {
     fontSize: 16,
     textAlign: 'center',
-    marginBottom: SIZES.xl,
-    opacity: 0.7,
+    lineHeight: 24,
+    maxWidth: 300,
+    marginBottom: SIZES.lg,
   },
-  addButton: {
-    paddingHorizontal: SIZES.xl,
+  ctaContainer: {
+    width: '100%',
+    gap: SIZES.sm,
+    paddingHorizontal: SIZES.md,
+  },
+  primaryCta: {
+    width: '100%',
+  },
+  secondaryCta: {
+    width: '100%',
+  },
+  section: {
+    paddingHorizontal: SIZES.lg,
+    paddingTop: SIZES.xl,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: SIZES.md,
+    textAlign: 'center',
+  },
+  problemCard: {
+    padding: SIZES.lg,
+    marginBottom: SIZES.md,
+    borderRadius: 16,
+  },
+  problemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.sm,
+    marginBottom: SIZES.md,
+  },
+  problemTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#EF4444',
+  },
+  problemList: {
+    gap: SIZES.sm,
+  },
+  problemItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.sm,
+  },
+  problemText: {
+    fontSize: 14,
+    flex: 1,
+  },
+  solutionCard: {
+    padding: SIZES.lg,
+    borderRadius: 16,
+  },
+  solutionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#10B981',
+  },
+  solutionText: {
+    fontSize: 14,
+    lineHeight: 22,
+  },
+  featuresGrid: {
+    gap: SIZES.md,
+  },
+  featureCard: {
+    padding: SIZES.lg,
+    borderRadius: 16,
+  },
+  featureIconContainer: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SIZES.sm,
+  },
+  featureTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: SIZES.xs,
+  },
+  featureDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  stepsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: SIZES.md,
+  },
+  stepItem: {
+    alignItems: 'center',
+    width: (width - SIZES.lg * 2 - SIZES.md * 3) / 2,
+    position: 'relative',
+  },
+  stepNumber: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: SIZES.sm,
+  },
+  stepTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 4,
+    textAlign: 'center',
+  },
+  stepDesc: {
+    fontSize: 12,
+    textAlign: 'center',
+  },
+  bottomCta: {
+    marginHorizontal: SIZES.lg,
+    marginTop: SIZES.xl * 1.5,
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  bottomCtaGradient: {
+    padding: SIZES.xl,
+    alignItems: 'center',
+  },
+  bottomCtaTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: SIZES.xs,
+    textAlign: 'center',
+  },
+  bottomCtaSubtitle: {
+    fontSize: 14,
+    color: 'rgba(255,255,255,0.8)',
+    marginBottom: SIZES.lg,
+    textAlign: 'center',
+  },
+  bottomCtaButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: SIZES.xl * 1.5,
+  },
+  footer: {
+    alignItems: 'center',
+    paddingTop: SIZES.xl,
+  },
+  footerText: {
+    fontSize: 12,
   },
 });

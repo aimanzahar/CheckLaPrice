@@ -14,7 +14,7 @@ function TabBarIcon(props: {
 }) {
   return (
     <View style={styles.iconContainer}>
-      <Ionicons size={26} style={{ marginBottom: -3 }} {...props} />
+      <Ionicons size={26} style={{ marginBottom: 2 }} {...props} />
       {props.focused && (
         <View style={[styles.activeIndicator, { backgroundColor: props.color }]} />
       )}
@@ -39,9 +39,19 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Wishlist',
+          title: 'Home',
           tabBarIcon: ({ color, focused }) => (
             <TabBarIcon name="home" color={color} focused={focused} />
+          ),
+          headerShown: false,
+        }}
+      />
+      <Tabs.Screen
+        name="wishlist"
+        options={{
+          title: 'Wishlist',
+          tabBarIcon: ({ color, focused }) => (
+            <TabBarIcon name="heart" color={color} focused={focused} />
           ),
           headerLeft: () => (
             <Link href="/settings" asChild>
@@ -118,13 +128,14 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: -4,
   },
   activeIndicator: {
     position: 'absolute',
     bottom: -6,
-    width: 4,
-    height: 4,
-    borderRadius: 2,
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
   },
   headerRight: {
     flexDirection: 'row',
@@ -133,15 +144,24 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   tabBar: {
-    paddingTop: 8,
-    paddingBottom: 8,
-    height: 60,
+    paddingTop: 10,
+    paddingBottom: 20,
+    height: 85,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   tabBarItem: {
-    paddingVertical: 4,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
   tabBarLabel: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '600',
+    marginTop: 4,
   },
 });
