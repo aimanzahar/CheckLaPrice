@@ -7,18 +7,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
 import React from 'react';
 import {
-  Alert,
-  ScrollView,
-  Share,
-  StyleSheet,
-  View,
+    Alert,
+    ScrollView,
+    Share,
+    StyleSheet,
+    View,
 } from 'react-native';
 import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  SlideInUp,
-  ZoomIn,
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    ZoomIn
 } from 'react-native-reanimated';
 
 // Sample products for demo
@@ -157,10 +156,6 @@ export default function ProductDetailScreen() {
     }
   };
 
-  const handleVisitStore = () => {
-    Alert.alert('Opening Store', `This would open ${product.store} in your browser`);
-  };
-
   const handleSetAlert = () => {
     Alert.alert(
       'Set Price Alert',
@@ -288,35 +283,46 @@ export default function ProductDetailScreen() {
           </Card>
         )}
 
+        {/* Description & Actions Section */}
         {product.description && (
-          <Card style={styles.descriptionCard} delay={350}>
-            <ThemedText style={styles.sectionTitle}>Description</ThemedText>
-            <ThemedText style={styles.description}>{product.description}</ThemedText>
+          <Card style={styles.descriptionCard} delay={500}>
+            <Animated.View entering={FadeInUp.delay(550)}>
+              {/* Description Header */}
+              <View style={styles.descriptionHeader}>
+                <View style={styles.descriptionTitleRow}>
+                  <Ionicons name="information-circle-outline" size={20} color={tintColor} />
+                  <ThemedText style={styles.descriptionTitle}>About this product</ThemedText>
+                </View>
+              </View>
+
+              {/* Description Text */}
+              <ThemedText style={styles.description}>{product.description}</ThemedText>
+
+              {/* Action Buttons */}
+              <View style={styles.actionButtonsContainer}>
+                <Button
+                  title="Set Price Alert"
+                  onPress={handleSetAlert}
+                  variant="outline"
+                  icon={<Ionicons name="notifications-outline" size={18} color={tintColor} />}
+                  style={styles.actionButton}
+                  textStyle={styles.actionButtonText}
+                />
+              </View>
+            </Animated.View>
           </Card>
         )}
 
-        <View style={styles.actions}>
-          <Animated.View entering={SlideInUp.delay(600).springify()}>
-            <Button
-              title="Visit Store"
-              onPress={handleVisitStore}
-              style={styles.actionButton}
-            />
-          </Animated.View>
-          <Animated.View entering={SlideInUp.delay(700).springify()}>
-            <Button
-              title="Set Price Alert"
-              onPress={handleSetAlert}
-              variant="outline"
-              style={styles.actionButton}
-            />
-          </Animated.View>
-          <Animated.View entering={FadeIn.delay(800)}>
+        {/* Remove from Wishlist */}
+        <View style={styles.removeSection}>
+          <Animated.View entering={FadeIn.delay(700)}>
             <Button
               title="Remove from Wishlist"
               onPress={handleRemoveFromWishlist}
               variant="ghost"
-              textStyle={{ color: '#FF3B30' }}
+              icon={<Ionicons name="heart-dislike-outline" size={18} color="#FF3B30" />}
+              textStyle={styles.removeButtonText}
+              style={styles.removeButton}
             />
           </Animated.View>
         </View>
@@ -459,18 +465,52 @@ const styles = StyleSheet.create({
   },
   descriptionCard: {
     margin: SIZES.md,
+    marginTop: SIZES.sm,
+  },
+  descriptionHeader: {
+    marginBottom: SIZES.md,
+  },
+  descriptionTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.xs,
+  },
+  descriptionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
   },
   description: {
-    fontSize: 16,
+    fontSize: 15,
     lineHeight: 24,
-    opacity: 0.9,
+    opacity: 0.75,
+    marginBottom: SIZES.lg,
   },
-  actions: {
-    padding: SIZES.md,
-    gap: SIZES.sm,
+  actionButtonsContainer: {
+    paddingTop: SIZES.md,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.06)',
   },
   actionButton: {
-    marginBottom: SIZES.sm,
+    height: 44,
+    borderRadius: 10,
+  },
+  actionButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  removeSection: {
+    paddingHorizontal: SIZES.md,
+    paddingTop: SIZES.sm,
+    paddingBottom: SIZES.md,
+    alignItems: 'center',
+  },
+  removeButton: {
+    paddingVertical: SIZES.sm,
+  },
+  removeButtonText: {
+    color: '#FF3B30',
+    fontSize: 14,
+    fontWeight: '500',
   },
   bottomSpacer: {
     height: SIZES.xl,

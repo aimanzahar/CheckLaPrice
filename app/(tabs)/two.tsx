@@ -85,9 +85,14 @@ export default function AnalysisScreen() {
 
         {/* Price Chart */}
         <Card style={styles.chartCard} delay={150}>
-          <ThemedText style={styles.sectionTitle}>7-Day Price Trend</ThemedText>
+          <View style={styles.chartHeader}>
+            <ThemedText style={styles.sectionTitle}>7-Day Price Trend</ThemedText>
+            <View style={styles.trendBadge}>
+              <ThemedText style={styles.trendText}>📉 Trending Down</ThemedText>
+            </View>
+          </View>
           <Animated.View entering={FadeIn.delay(300).duration(500)}>
-            <PriceChart data={priceData} height={250} />
+            <PriceChart data={priceData} height={200} />
           </Animated.View>
           <View style={styles.priceStats}>
             <Animated.View entering={FadeInUp.delay(400)} style={styles.stat}>
@@ -96,7 +101,7 @@ export default function AnalysisScreen() {
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Volatility</ThemedText>
-              <ThemedText style={styles.statValue}>Low</ThemedText>
+              <ThemedText style={[styles.statValue, { color: '#34C759' }]}>Low</ThemedText>
             </Animated.View>
             <Animated.View entering={FadeInUp.delay(600)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Prediction</ThemedText>
@@ -207,18 +212,36 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    marginBottom: SIZES.md,
   },
   chartCard: {
     marginBottom: SIZES.md,
+    paddingHorizontal: SIZES.md,
+    paddingVertical: SIZES.md,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SIZES.sm,
+  },
+  trendBadge: {
+    backgroundColor: 'rgba(52, 199, 89, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  trendText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#34C759',
   },
   priceStats: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: SIZES.lg,
+    marginTop: SIZES.md,
     paddingTop: SIZES.md,
     borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
+    borderTopColor: 'rgba(0,0,0,0.06)',
   },
   stat: {
     alignItems: 'center',

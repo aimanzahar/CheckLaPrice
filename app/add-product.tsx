@@ -3,8 +3,10 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
 import { SIZES } from '@/utils/constants';
+import { api } from '@/convex/_generated/api';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useMutation } from 'convex/react';
 import React, { useState } from 'react';
 import {
   Alert,
@@ -24,6 +26,8 @@ import Animated, {
 
 export default function AddProductScreen() {
   const { url } = useLocalSearchParams<{ url?: string }>();
+  const addProduct = useMutation(api.products.add);
+  
   const [productUrl, setProductUrl] = useState(url || '');
   const [productName, setProductName] = useState('');
   const [productPrice, setProductPrice] = useState('');
@@ -89,10 +93,25 @@ export default function AddProductScreen() {
       return;
     }
 
+    const store = extractedData?.store || productStore || 'Unknown';
+    if (!store || store === 'Unknown') {
+      Alert.alert('Error', 'Please enter a store name');
+      return;
+    }
+
     setLoading(true);
     try {
-      // Simulate saving (in a real app, this would save to Convex)
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Save to Convex
+      await addProduct({
+        name: productName,
+        currentPrice: price,
+        originalPrice: price,
+        image: extractedData?.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
+        store: store,
+        url: productUrl || undefined,
+        description: extractedData?.description,
+        targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
+      });
 
       Alert.alert(
         'Success!',
