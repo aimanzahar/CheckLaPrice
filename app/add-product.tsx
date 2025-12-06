@@ -10,22 +10,22 @@ import { useMutation } from 'convex/react';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    TouchableOpacity,
+    View,
 } from 'react-native';
 import Animated, {
-  FadeIn,
-  FadeInDown,
-  FadeInUp,
-  FadeOut,
-  SlideInUp,
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    FadeOut,
+    SlideInUp,
 } from 'react-native-reanimated';
 
 type Step = 'search' | 'selection' | 'details';
@@ -61,9 +61,18 @@ export default function AddProductScreen() {
 
     setLoading(true);
     setErrorMessage(null);
+    console.log('[AddProduct] Search pressed', {
+      query: searchQuery.trim(),
+      step,
+    });
     
     try {
       const response = await apiService.scrapeLazada(searchQuery.trim());
+      console.log('[AddProduct] Search response', {
+        success: response.success,
+        count: response.data?.length ?? 0,
+        error: response.error,
+      });
       
       if (!response.success) {
         setErrorMessage(response.error || 'Failed to search products');
@@ -80,6 +89,7 @@ export default function AddProductScreen() {
       setScrapedProducts(response.data);
       setStep('selection');
     } catch (error) {
+      console.log('[AddProduct] Search error', error);
       const message = error instanceof Error ? error.message : 'An unexpected error occurred';
       setErrorMessage(message);
       Alert.alert('Error', message);
