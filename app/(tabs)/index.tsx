@@ -1,20 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  RefreshControl,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { ProductCard } from '@/components/ui/ProductCard';
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { ProductCard } from '@/components/ui/ProductCard';
 import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import {
+    Alert,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    View,
+} from 'react-native';
+import Animated, {
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    SlideInUp
+} from 'react-native-reanimated';
 
 // Mock data - replace with actual API calls
 const mockProducts = [
@@ -88,35 +92,48 @@ export default function HomeScreen() {
   };
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Ionicons name="pricetag-outline" size={64} color={tintColor} />
-      <ThemedText style={styles.emptyTitle}>Track Your First Product</ThemedText>
-      <ThemedText style={styles.emptyMessage}>
-        Add products to your wishlist and we'll monitor prices for you
-      </ThemedText>
-      <Button
-        title="Add Product"
-        onPress={() => router.push('/add-product')}
-        style={styles.addButton}
-      />
-    </View>
+    <Animated.View 
+      entering={FadeIn.delay(200).duration(400)}
+      style={styles.emptyState}
+    >
+      <Animated.View entering={FadeInUp.delay(300).springify()}>
+        <Ionicons name="pricetag-outline" size={64} color={tintColor} />
+      </Animated.View>
+      <Animated.View entering={FadeInUp.delay(400).springify()}>
+        <ThemedText style={styles.emptyTitle}>Track Your First Product</ThemedText>
+      </Animated.View>
+      <Animated.View entering={FadeInUp.delay(500).springify()}>
+        <ThemedText style={styles.emptyMessage}>
+          Add products to your wishlist and we'll monitor prices for you
+        </ThemedText>
+      </Animated.View>
+      <Animated.View entering={SlideInUp.delay(600).springify()}>
+        <Button
+          title="Add Product"
+          onPress={() => router.push('/add-product')}
+          style={styles.addButton}
+        />
+      </Animated.View>
+    </Animated.View>
   );
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <ThemedText style={styles.title}>My Wishlist</ThemedText>
+      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <ThemedText style={styles.title}>My Wishlist</ThemedText>
+      </Animated.View>
       <View style={styles.statsRow}>
-        <Card style={styles.statCard}>
+        <Card style={styles.statCard} delay={150}>
           <ThemedText style={styles.statNumber}>{products.length}</ThemedText>
           <ThemedText style={styles.statLabel}>Items</ThemedText>
         </Card>
-        <Card style={styles.statCard}>
+        <Card style={styles.statCard} delay={250}>
           <ThemedText style={styles.statNumber}>
             {products.filter(p => p.trend === 'down').length}
           </ThemedText>
           <ThemedText style={styles.statLabel}>Dropping</ThemedText>
         </Card>
-        <Card style={styles.statCard}>
+        <Card style={styles.statCard} delay={350}>
           <ThemedText style={styles.statNumber}>
             ${products.reduce((sum, p) => sum + p.currentPrice, 0).toFixed(0)}
           </ThemedText>
@@ -130,11 +147,12 @@ export default function HomeScreen() {
     <ThemedView style={styles.container}>
       <FlatList
         data={products}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <ProductCard
             product={item}
             onPress={() => handleProductPress(item.id)}
             onDelete={() => handleDeleteProduct(item.id)}
+            index={index}
           />
         )}
         keyExtractor={item => item.id}

@@ -10,8 +10,8 @@ import { useColorScheme } from '@/components/useColorScheme';
 import { ConvexStatusProvider } from '@/providers/ConvexProvider';
 
 export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
+    // Catch any errors thrown by the Layout component.
+    ErrorBoundary
 } from 'expo-router';
 
 export const unstable_settings = {
@@ -52,9 +52,47 @@ function RootLayoutNav() {
   return (
     <ConvexStatusProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
+        <Stack
+          screenOptions={{
+            animation: 'slide_from_right',
+            animationDuration: 300,
+            gestureEnabled: true,
+            gestureDirection: 'horizontal',
+          }}
+        >
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen
+            name="modal"
+            options={{
+              presentation: 'modal',
+              animation: 'slide_from_bottom',
+              animationDuration: 350,
+            }}
+          />
+          <Stack.Screen
+            name="add-product"
+            options={{
+              title: 'Add Product',
+              animation: 'slide_from_bottom',
+              animationDuration: 300,
+              presentation: 'modal',
+            }}
+          />
+          <Stack.Screen
+            name="alerts"
+            options={{
+              title: 'Alerts',
+              animation: 'slide_from_right',
+            }}
+          />
+          <Stack.Screen
+            name="product/[id]"
+            options={{
+              title: 'Product Details',
+              animation: 'slide_from_right',
+              animationDuration: 250,
+            }}
+          />
         </Stack>
       </ThemeProvider>
     </ConvexStatusProvider>

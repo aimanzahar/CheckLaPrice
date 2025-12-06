@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  RefreshControl,
-  SegmentedControl,
-} from 'react-native';
-import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
 import { AlertCard } from '@/components/ui/AlertCard';
 import { Card } from '@/components/ui/Card';
 import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import React, { useState } from 'react';
+import {
+    FlatList,
+    Pressable,
+    RefreshControl,
+    SegmentedControl,
+    StyleSheet,
+    View,
+} from 'react-native';
+import Animated, {
+    FadeIn,
+    FadeInDown,
+    FadeInUp
+} from 'react-native-reanimated';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // Mock alerts data
 const mockAlerts = [
@@ -119,47 +126,61 @@ export default function AlertsScreen() {
 
   const renderHeader = () => (
     <View style={styles.header}>
-      <ThemedText style={styles.title}>
-        Alerts {unreadCount > 0 && `(${unreadCount})`}
-      </ThemedText>
-      <SegmentedControl
-        values={filterOptions}
-        selectedIndex={selectedIndex}
-        onChange={e => setSelectedIndex(e.nativeEvent.selectedSegmentIndex)}
-        tintColor={tintColor}
-        style={styles.segmentedControl}
-      />
+      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <ThemedText style={styles.title}>
+          Alerts {unreadCount > 0 && `(${unreadCount})`}
+        </ThemedText>
+      </Animated.View>
+      <Animated.View entering={FadeIn.delay(200).duration(300)}>
+        <SegmentedControl
+          values={filterOptions}
+          selectedIndex={selectedIndex}
+          onChange={e => setSelectedIndex(e.nativeEvent.selectedSegmentIndex)}
+          tintColor={tintColor}
+          style={styles.segmentedControl}
+        />
+      </Animated.View>
       {unreadCount > 0 && (
-        <Card style={styles.markAllCard}>
-          <ThemedText onPress={handleMarkAllAsRead} style={styles.markAllText}>
-            Mark all as read
-          </ThemedText>
-        </Card>
+        <Animated.View entering={FadeIn.delay(300)}>
+          <Card style={styles.markAllCard} animated={false}>
+            <ThemedText onPress={handleMarkAllAsRead} style={styles.markAllText}>
+              Mark all as read
+            </ThemedText>
+          </Card>
+        </Animated.View>
       )}
     </View>
   );
 
   const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <ThemedText style={styles.emptyTitle}>No alerts</ThemedText>
-      <ThemedText style={styles.emptyMessage}>
-        {selectedIndex === 1
-          ? "You're all caught up! No unread alerts."
-          : 'No alerts match your filter criteria.'}
-      </ThemedText>
-    </View>
+    <Animated.View 
+      entering={FadeIn.delay(200).duration(400)}
+      style={styles.emptyState}
+    >
+      <Animated.View entering={FadeInUp.delay(300).springify()}>
+        <ThemedText style={styles.emptyTitle}>No alerts</ThemedText>
+      </Animated.View>
+      <Animated.View entering={FadeInUp.delay(400).springify()}>
+        <ThemedText style={styles.emptyMessage}>
+          {selectedIndex === 1
+            ? "You're all caught up! No unread alerts."
+            : 'No alerts match your filter criteria.'}
+        </ThemedText>
+      </Animated.View>
+    </Animated.View>
   );
 
   return (
     <ThemedView style={styles.container}>
       <FlatList
         data={filteredAlerts}
-        renderItem={({ item }) => (
+        renderItem={({ item, index }) => (
           <AlertCard
             alert={item}
             onPress={() => handleAlertPress(item.id)}
             onMarkAsRead={() => handleMarkAsRead(item.id)}
             onDelete={() => handleDeleteAlert(item.id)}
+            index={index}
           />
         )}
         keyExtractor={item => item.id}

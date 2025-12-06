@@ -1,19 +1,26 @@
-import React, { useState } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Share,
-  Alert,
-} from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
-import { Button } from '@/components/ui/Button';
 import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInRight,
+  FadeInUp,
+  SlideInUp,
+  ZoomIn,
+} from 'react-native-reanimated';
 
 // Mock product data
 const mockProduct = {
@@ -114,38 +121,47 @@ export default function ProductDetailScreen() {
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Card style={styles.imageCard}>
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="image" size={64} color={borderColor} />
-          </View>
-          {discountPercentage > 0 && (
-            <View style={styles.discountBadge}>
-              <ThemedText style={styles.discountText}>-{discountPercentage}%</ThemedText>
+        <Animated.View entering={ZoomIn.delay(100).duration(400)}>
+          <Card style={styles.imageCard} delay={0}>
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="image" size={64} color={borderColor} />
             </View>
-          )}
-        </Card>
+            {discountPercentage > 0 && (
+              <Animated.View 
+                entering={FadeIn.delay(400).duration(300)}
+                style={styles.discountBadge}
+              >
+                <ThemedText style={styles.discountText}>-{discountPercentage}%</ThemedText>
+              </Animated.View>
+            )}
+          </Card>
+        </Animated.View>
 
         <View style={styles.header}>
           <View style={styles.titleRow}>
-            <ThemedText style={styles.title}>{product.name}</ThemedText>
-            <Button
-              title=""
-              icon={<Ionicons name="share-outline" size={24} color={tintColor} />}
-              onPress={handleShare}
-              variant="ghost"
-            />
+            <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flex: 1 }}>
+              <ThemedText style={styles.title}>{product.name}</ThemedText>
+            </Animated.View>
+            <Animated.View entering={FadeIn.delay(300)}>
+              <Button
+                title=""
+                icon={<Ionicons name="share-outline" size={24} color={tintColor} />}
+                onPress={handleShare}
+                variant="ghost"
+              />
+            </Animated.View>
           </View>
 
-          <View style={styles.priceRow}>
+          <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.priceRow}>
             <ThemedText style={styles.currentPrice}>${product.currentPrice}</ThemedText>
             {product.originalPrice && (
               <ThemedText style={styles.originalPrice}>
                 ${product.originalPrice}
               </ThemedText>
             )}
-          </View>
+          </Animated.View>
 
-          <View style={styles.metaRow}>
+          <Animated.View entering={FadeIn.delay(400)} style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Ionicons name="storefront-outline" size={20} color={tintColor} />
               <ThemedText style={styles.metaText}>{product.store}</ThemedText>
@@ -154,67 +170,79 @@ export default function ProductDetailScreen() {
               <Ionicons name="time-outline" size={20} color={tintColor} />
               <ThemedText style={styles.metaText}>Updated 2h ago</ThemedText>
             </View>
-          </View>
+          </Animated.View>
         </View>
 
-        <Card style={styles.chartCard}>
+        <Card style={styles.chartCard} delay={250}>
           <ThemedText style={styles.sectionTitle}>Price History</ThemedText>
-          <PriceChart data={priceData} height={200} showDots={true} />
+          <Animated.View entering={FadeIn.delay(450).duration(500)}>
+            <PriceChart data={priceData} height={200} showDots={true} />
+          </Animated.View>
           <View style={styles.statsRow}>
-            <View style={styles.stat}>
+            <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Lowest</ThemedText>
               <ThemedText style={styles.statValue}>
                 ${Math.min(...product.priceHistory.map(p => p.price)).toFixed(2)}
               </ThemedText>
-            </View>
-            <View style={styles.stat}>
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(600)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Highest</ThemedText>
               <ThemedText style={styles.statValue}>
                 ${Math.max(...product.priceHistory.map(p => p.price)).toFixed(2)}
               </ThemedText>
-            </View>
-            <View style={styles.stat}>
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(700)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Average</ThemedText>
               <ThemedText style={styles.statValue}>
                 ${(product.priceHistory.reduce((sum, p) => sum + p.price, 0) / product.priceHistory.length).toFixed(2)}
               </ThemedText>
-            </View>
+            </Animated.View>
           </View>
         </Card>
 
-        <Card style={styles.descriptionCard}>
+        <Card style={styles.descriptionCard} delay={350}>
           <ThemedText style={styles.sectionTitle}>Description</ThemedText>
           <ThemedText style={styles.description}>{product.description}</ThemedText>
         </Card>
 
-        <Card style={styles.specsCard}>
+        <Card style={styles.specsCard} delay={450}>
           <ThemedText style={styles.sectionTitle}>Specifications</ThemedText>
-          {Object.entries(product.specifications).map(([key, value]) => (
-            <View key={key} style={[styles.specRow, { borderBottomColor: borderColor }]}>
+          {Object.entries(product.specifications).map(([key, value], index) => (
+            <Animated.View
+              key={key}
+              entering={FadeInRight.delay(500 + index * 50)}
+              style={[styles.specRow, { borderBottomColor: borderColor }]}
+            >
               <ThemedText style={styles.specLabel}>{key}</ThemedText>
               <ThemedText style={styles.specValue}>{value}</ThemedText>
-            </View>
+            </Animated.View>
           ))}
         </Card>
 
         <View style={styles.actions}>
-          <Button
-            title="Visit Store"
-            onPress={handleVisitStore}
-            style={styles.actionButton}
-          />
-          <Button
-            title="Set Alert"
-            onPress={handleSetAlert}
-            variant="outline"
-            style={styles.actionButton}
-          />
-          <Button
-            title="Remove"
-            onPress={handleRemoveFromWishlist}
-            variant="ghost"
-            textStyle={{ color: '#FF3B30' }}
-          />
+          <Animated.View entering={SlideInUp.delay(600).springify()}>
+            <Button
+              title="Visit Store"
+              onPress={handleVisitStore}
+              style={styles.actionButton}
+            />
+          </Animated.View>
+          <Animated.View entering={SlideInUp.delay(700).springify()}>
+            <Button
+              title="Set Alert"
+              onPress={handleSetAlert}
+              variant="outline"
+              style={styles.actionButton}
+            />
+          </Animated.View>
+          <Animated.View entering={FadeIn.delay(800)}>
+            <Button
+              title="Remove"
+              onPress={handleRemoveFromWishlist}
+              variant="ghost"
+              textStyle={{ color: '#FF3B30' }}
+            />
+          </Animated.View>
         </View>
 
         <View style={styles.bottomSpacer} />
