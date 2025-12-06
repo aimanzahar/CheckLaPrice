@@ -1,31 +1,38 @@
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { SIZES } from '@/utils/constants';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
 import {
-  View,
-  ScrollView,
-  StyleSheet,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
+  StyleSheet,
+  View,
 } from 'react-native';
-import { router, useLocalSearchParams } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Card } from '@/components/ui/Card';
-import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  FadeOut,
+  SlideInUp,
+} from 'react-native-reanimated';
 
 export default function AddProductScreen() {
   const { url } = useLocalSearchParams<{ url?: string }>();
   const [productUrl, setProductUrl] = useState(url || '');
   const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productStore, setProductStore] = useState('');
   const [targetPrice, setTargetPrice] = useState('');
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'url' | 'details'>('url');
   const [extractedData, setExtractedData] = useState<any>(null);
 
-  const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
 
@@ -44,19 +51,20 @@ export default function AddProductScreen() {
 
     setLoading(true);
     try {
-      // TODO: Implement actual product extraction API call
+      // Simulate product extraction
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       // Mock extracted data
-      setExtractedData({
-        name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
-        price: 279.99,
-        image: 'https://via.placeholder.com/300',
+      const mockData = {
+        name: 'Sample Product from URL',
+        price: 99.99,
+        image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
         store: 'Amazon',
-        description: 'Industry-leading noise canceling with Dual Noise Sensor technology',
-      });
+        description: 'A great product extracted from the URL',
+      };
 
-      setProductName(extractedData.name);
+      setExtractedData(mockData);
+      setProductName(mockData.name);
       setStep('details');
     } catch (error) {
       Alert.alert('Error', 'Failed to extract product information. Please try again.');
@@ -75,9 +83,15 @@ export default function AddProductScreen() {
       return;
     }
 
+    const price = extractedData?.price || parseFloat(productPrice) || 0;
+    if (price <= 0) {
+      Alert.alert('Error', 'Please enter a valid price');
+      return;
+    }
+
     setLoading(true);
     try {
-      // TODO: Implement actual API call to save product
+      // Simulate saving (in a real app, this would save to Convex)
       await new Promise(resolve => setTimeout(resolve, 1000));
 
       Alert.alert(
@@ -91,6 +105,7 @@ export default function AddProductScreen() {
         ]
       );
     } catch (error) {
+      console.error('Error adding product:', error);
       Alert.alert('Error', 'Failed to add product. Please try again.');
     } finally {
       setLoading(false);
@@ -98,112 +113,175 @@ export default function AddProductScreen() {
   };
 
   const renderUrlStep = () => (
-    <View>
-      <ThemedText style={styles.title}>Add Product</ThemedText>
-      <ThemedText style={styles.subtitle}>
-        Enter the product URL to automatically fetch details
-      </ThemedText>
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      exiting={FadeOut.duration(200)}
+    >
+      <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+        <ThemedText style={styles.title}>Add Product</ThemedText>
+      </Animated.View>
+      <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+        <ThemedText style={styles.subtitle}>
+          Enter the product URL to automatically fetch details
+        </ThemedText>
+      </Animated.View>
 
-      <Input
-        label="Product URL"
-        value={productUrl}
-        onChangeText={setProductUrl}
-        placeholder="https://www.amazon.com/dp/..."
-        autoCapitalize="none"
-        keyboardType="url"
-        leftIcon={<Ionicons name="link" size={20} color={tintColor} />}
-      />
+      <Animated.View entering={SlideInUp.delay(300).springify()}>
+        <Input
+          label="Product URL"
+          value={productUrl}
+          onChangeText={setProductUrl}
+          placeholder="https://www.amazon.com/dp/..."
+          autoCapitalize="none"
+          keyboardType="url"
+          leftIcon={<Ionicons name="link" size={20} color={tintColor} />}
+        />
+      </Animated.View>
 
-      <Button
-        title={loading ? 'Extracting...' : 'Extract Product Info'}
-        onPress={handleExtractProduct}
-        loading={loading}
-        style={styles.extractButton}
-      />
+      <Animated.View entering={FadeInUp.delay(400).springify()}>
+        <Button
+          title={loading ? 'Extracting...' : 'Extract Product Info'}
+          onPress={handleExtractProduct}
+          loading={loading}
+          style={styles.extractButton}
+        />
+      </Animated.View>
 
-      <View style={styles.divider}>
+      <Animated.View entering={FadeIn.delay(500)} style={styles.divider}>
         <View style={[styles.line, { backgroundColor: borderColor }]} />
         <ThemedText style={styles.orText}>OR</ThemedText>
         <View style={[styles.line, { backgroundColor: borderColor }]} />
-      </View>
+      </Animated.View>
 
-      <Button
-        title="Enter Manually"
-        onPress={handleManualEntry}
-        variant="outline"
-      />
+      <Animated.View entering={FadeInUp.delay(600).springify()}>
+        <Button
+          title="Enter Manually"
+          onPress={handleManualEntry}
+          variant="outline"
+        />
+      </Animated.View>
 
-      <ThemedText style={styles.storesTitle}>Popular Stores</ThemedText>
+      <Animated.View entering={FadeInUp.delay(700)}>
+        <ThemedText style={styles.storesTitle}>Popular Stores</ThemedText>
+      </Animated.View>
       <View style={styles.storesGrid}>
         {commonStores.map((store, index) => (
-          <Card key={index} style={styles.storeCard}>
-            <ThemedText style={styles.storeName}>{store.name}</ThemedText>
-          </Card>
+          <Animated.View
+            key={index}
+            entering={FadeInUp.delay(750 + index * 50).springify()}
+            style={{ width: '48%' }}
+          >
+            <Card style={styles.storeCard} pressable>
+              <ThemedText style={styles.storeName}>{store.name}</ThemedText>
+            </Card>
+          </Animated.View>
         ))}
       </View>
-    </View>
+    </Animated.View>
   );
 
   const renderDetailsStep = () => (
-    <View>
+    <Animated.View
+      entering={FadeIn.duration(300)}
+      exiting={FadeOut.duration(200)}
+    >
       <View style={styles.header}>
-        <Button
-          title=""
-          icon={<Ionicons name="arrow-back" size={24} color={tintColor} />}
-          onPress={() => setStep('url')}
-          variant="ghost"
-        />
-        <ThemedText style={styles.title}>Product Details</ThemedText>
+        <Animated.View entering={FadeInUp.delay(100).springify()}>
+          <Button
+            title=""
+            icon={<Ionicons name="arrow-back" size={24} color={tintColor} />}
+            onPress={() => setStep('url')}
+            variant="ghost"
+          />
+        </Animated.View>
+        <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <ThemedText style={styles.title}>Product Details</ThemedText>
+        </Animated.View>
         <View style={{ width: 40 }} />
       </View>
 
       {extractedData && (
-        <Card style={styles.previewCard}>
-          <ThemedText style={styles.previewTitle}>Extracted Information</ThemedText>
-          <View style={styles.previewContent}>
-            <ThemedText style={styles.previewLabel}>Name:</ThemedText>
-            <ThemedText style={styles.previewValue}>{extractedData.name}</ThemedText>
-            <ThemedText style={styles.previewLabel}>Price:</ThemedText>
-            <ThemedText style={styles.previewValue}>${extractedData.price}</ThemedText>
-            <ThemedText style={styles.previewLabel}>Store:</ThemedText>
-            <ThemedText style={styles.previewValue}>{extractedData.store}</ThemedText>
-          </View>
-        </Card>
+        <Animated.View entering={FadeInUp.delay(200).springify()}>
+          <Card style={styles.previewCard} delay={0}>
+            <ThemedText style={styles.previewTitle}>Extracted Information</ThemedText>
+            <View style={styles.previewContent}>
+              <ThemedText style={styles.previewLabel}>Name:</ThemedText>
+              <ThemedText style={styles.previewValue}>{extractedData.name}</ThemedText>
+              <ThemedText style={styles.previewLabel}>Price:</ThemedText>
+              <ThemedText style={styles.previewValue}>${extractedData.price}</ThemedText>
+              <ThemedText style={styles.previewLabel}>Store:</ThemedText>
+              <ThemedText style={styles.previewValue}>{extractedData.store}</ThemedText>
+            </View>
+          </Card>
+        </Animated.View>
       )}
 
-      <Input
-        label="Product Name"
-        value={productName}
-        onChangeText={setProductName}
-        placeholder="Enter product name"
-        leftIcon={<Ionicons name="pricetag" size={20} color={tintColor} />}
-      />
+      <Animated.View entering={SlideInUp.delay(300).springify()}>
+        <Input
+          label="Product Name"
+          value={productName}
+          onChangeText={setProductName}
+          placeholder="Enter product name"
+          leftIcon={<Ionicons name="pricetag" size={20} color={tintColor} />}
+        />
+      </Animated.View>
 
-      <Input
-        label="Target Price (Optional)"
-        value={targetPrice}
-        onChangeText={setTargetPrice}
-        placeholder="100.00"
-        keyboardType="numeric"
-        leftIcon={<Ionicons name="cash" size={20} color={tintColor} />}
-      />
+      {!extractedData && (
+        <>
+          <Animated.View entering={SlideInUp.delay(350).springify()}>
+            <Input
+              label="Current Price"
+              value={productPrice}
+              onChangeText={setProductPrice}
+              placeholder="299.99"
+              keyboardType="numeric"
+              leftIcon={<Ionicons name="cash" size={20} color={tintColor} />}
+            />
+          </Animated.View>
 
-      <Card style={styles.tipCard}>
-        <View style={styles.tip}>
-          <Ionicons name="information-circle" size={20} color={tintColor} />
-          <ThemedText style={styles.tipText}>
-            We'll notify you when the price drops to or below your target price
-          </ThemedText>
-        </View>
-      </Card>
+          <Animated.View entering={SlideInUp.delay(375).springify()}>
+            <Input
+              label="Store"
+              value={productStore}
+              onChangeText={setProductStore}
+              placeholder="Amazon, Best Buy, etc."
+              leftIcon={<Ionicons name="storefront" size={20} color={tintColor} />}
+            />
+          </Animated.View>
+        </>
+      )}
 
-      <Button
-        title={loading ? 'Adding...' : 'Add to Wishlist'}
-        onPress={handleAddToWishlist}
-        loading={loading}
-        style={styles.addButton}
-      />
-    </View>
+      <Animated.View entering={SlideInUp.delay(400).springify()}>
+        <Input
+          label="Target Price (Optional)"
+          value={targetPrice}
+          onChangeText={setTargetPrice}
+          placeholder="Alert me when price drops to..."
+          keyboardType="numeric"
+          leftIcon={<Ionicons name="notifications" size={20} color={tintColor} />}
+        />
+      </Animated.View>
+
+      <Animated.View entering={FadeIn.delay(500)}>
+        <Card style={styles.tipCard} animated={false}>
+          <View style={styles.tip}>
+            <Ionicons name="information-circle" size={20} color={tintColor} />
+            <ThemedText style={styles.tipText}>
+              We'll notify you when the price drops to or below your target price
+            </ThemedText>
+          </View>
+        </Card>
+      </Animated.View>
+
+      <Animated.View entering={FadeInUp.delay(600).springify()}>
+        <Button
+          title={loading ? 'Adding...' : 'Add to Wishlist'}
+          onPress={handleAddToWishlist}
+          loading={loading}
+          style={styles.addButton}
+        />
+      </Animated.View>
+    </Animated.View>
   );
 
   return (
@@ -277,7 +355,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   storeCard: {
-    width: '48%',
     alignItems: 'center',
     padding: SIZES.md,
     marginBottom: SIZES.sm,

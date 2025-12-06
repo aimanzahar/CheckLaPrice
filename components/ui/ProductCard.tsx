@@ -1,15 +1,26 @@
+import { useThemeColor } from '@/components/Themed';
+import { SIZES } from '@/utils/constants';
+import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  TouchableOpacity,
+    Pressable,
+    StyleSheet,
+    Text,
+    View
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useThemeColor } from '@/components/Themed';
+import Animated, {
+    FadeIn,
+    Layout,
+    SlideOutLeft,
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withSpring,
+    withTiming
+} from 'react-native-reanimated';
 import { Card } from './Card';
-import { SIZES } from '@/utils/constants';
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 interface ProductCardProps {
   product: {
@@ -25,14 +36,52 @@ interface ProductCardProps {
   };
   onPress: () => void;
   onDelete?: () => void;
+  index?: number;
 }
 
-export function ProductCard({ product, onPress, onDelete }: ProductCardProps) {
+export function ProductCard({ product, onPress, onDelete, index = 0 }: ProductCardProps) {
   const textColor = useThemeColor({}, 'text');
   const primaryColor = useThemeColor({}, 'tint');
   const successColor = '#34C759';
   const errorColor = '#FF3B30';
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
+
+  // Press animation
+  const scale = useSharedValue(1);
+  const shadowOpacity = useSharedValue(0.1);
+
+  // Delete button animation
+  const deleteScale = useSharedValue(1);
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.98, { damping: 15, stiffness: 300 });
+    shadowOpacity.value = withTiming(0.05, { duration: 100 });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, { damping: 15, stiffness: 150 });
+    shadowOpacity.value = withTiming(0.1, { duration: 150 });
+  };
+
+  const handleDeletePressIn = () => {
+    deleteScale.value = withSequence(
+      withSpring(0.8, { damping: 10, stiffness: 400 }),
+      withSpring(1.1, { damping: 10, stiffness: 200 })
+    );
+  };
+
+  const handleDeletePressOut = () => {
+    deleteScale.value = withSpring(1, { damping: 15, stiffness: 150 });
+  };
+
+  const animatedCardStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    shadowOpacity: shadowOpacity.value,
+  }));
+
+  const deleteButtonStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: deleteScale.value }],
+  }));
 
   const priceChangeColor = product.trend === 'up' ? errorColor : successColor;
   const priceChangeIcon = product.trend === 'up' ? 'trending-up' : 'trending-down';
@@ -42,61 +91,84 @@ export function ProductCard({ product, onPress, onDelete }: ProductCardProps) {
     : 0;
 
   return (
-    <Card style={styles.container}>
-      <TouchableOpacity onPress={onPress} style={styles.content}>
-        <Image source={{ uri: product.image }} style={styles.image} />
+    <Animated.View
+      entering={FadeIn.delay(index * 100).duration(300)}
+      exiting={SlideOutLeft.duration(200)}
+      layout={Layout.springify().damping(15)}
+    >
+      <Card style={styles.container} animated={false}>
+        <AnimatedPressable
+          onPress={onPress}
+          onPressIn={handlePressIn}
+          onPressOut={handlePressOut}
+          style={[styles.content, animatedCardStyle]}
+        >
+          <Animated.Image
+            source={{ uri: product.image }}
+            style={styles.image}
+            sharedTransitionTag={`product-image-${product.id}`}
+          />
 
-        <View style={styles.details}>
-          <View style={styles.header}>
-            <Text style={[styles.name, { color: textColor }]} numberOfLines={2}>
-              {product.name}
-            </Text>
-            {onDelete && (
-              <TouchableOpacity onPress={onDelete} style={styles.deleteButton}>
-                <Ionicons name="trash-outline" size={20} color={errorColor} />
-              </TouchableOpacity>
-            )}
-          </View>
+          <View style={styles.details}>
+            <View style={styles.header}>
+              <Text style={[styles.name, { color: textColor }]} numberOfLines={2}>
+                {product.name}
+              </Text>
+              {onDelete && (
+                <AnimatedPressable
+                  onPress={onDelete}
+                  onPressIn={handleDeletePressIn}
+                  onPressOut={handleDeletePressOut}
+                  style={[styles.deleteButton, deleteButtonStyle]}
+                >
+                  <Ionicons name="trash-outline" size={20} color={errorColor} />
+                </AnimatedPressable>
+              )}
+            </View>
 
-          <Text style={[styles.store, { color: primaryColor }]}>{product.store}</Text>
+            <Text style={[styles.store, { color: primaryColor }]}>{product.store}</Text>
 
-          <View style={styles.priceContainer}>
-            <Text style={[styles.currentPrice, { color: textColor }]}>
-              ${product.currentPrice.toFixed(2)}
-            </Text>
+            <View style={styles.priceContainer}>
+              <Text style={[styles.currentPrice, { color: textColor }]}>
+                ${product.currentPrice.toFixed(2)}
+              </Text>
 
-            {hasDiscount && (
-              <View style={styles.discountContainer}>
-                <Text style={styles.originalPrice}>
-                  ${product.originalPrice!.toFixed(2)}
-                </Text>
-                <View style={styles.discountBadge}>
-                  <Text style={styles.discountText}>-{discountPercentage}%</Text>
+              {hasDiscount && (
+                <Animated.View
+                  entering={FadeIn.delay(200)}
+                  style={styles.discountContainer}
+                >
+                  <Text style={styles.originalPrice}>
+                    ${product.originalPrice!.toFixed(2)}
+                  </Text>
+                  <View style={styles.discountBadge}>
+                    <Text style={styles.discountText}>-{discountPercentage}%</Text>
+                  </View>
+                </Animated.View>
+              )}
+            </View>
+
+            <View style={styles.footer}>
+              {product.priceChange !== undefined && (
+                <View style={styles.priceChange}>
+                  <Ionicons
+                    name={priceChangeIcon}
+                    size={16}
+                    color={priceChangeColor}
+                  />
+                  <Text style={[styles.priceChangeText, { color: priceChangeColor }]}>
+                    {Math.abs(product.priceChange).toFixed(2)} ({product.trend})
+                  </Text>
                 </View>
-              </View>
-            )}
+              )}
+              <Text style={[styles.lastUpdated, { color: borderColor }]}>
+                {product.lastUpdated}
+              </Text>
+            </View>
           </View>
-
-          <View style={styles.footer}>
-            {product.priceChange !== undefined && (
-              <View style={styles.priceChange}>
-                <Ionicons
-                  name={priceChangeIcon}
-                  size={16}
-                  color={priceChangeColor}
-                />
-                <Text style={[styles.priceChangeText, { color: priceChangeColor }]}>
-                  {Math.abs(product.priceChange).toFixed(2)} ({product.trend})
-                </Text>
-              </View>
-            )}
-            <Text style={[styles.lastUpdated, { color: borderColor }]}>
-              {product.lastUpdated}
-            </Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    </Card>
+        </AnimatedPressable>
+      </Card>
+    </Animated.View>
   );
 }
 

@@ -15,7 +15,7 @@ import Animated, {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export interface ButtonProps extends TouchableOpacityProps {
+export interface AnimatedButtonProps extends TouchableOpacityProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   loading?: boolean;
@@ -24,7 +24,7 @@ export interface ButtonProps extends TouchableOpacityProps {
   textStyle?: any;
 }
 
-export function Button({
+export function AnimatedButton({
   title,
   variant = 'primary',
   loading = false,
@@ -35,7 +35,7 @@ export function Button({
   textStyle,
   onPress,
   ...props
-}: ButtonProps) {
+}: AnimatedButtonProps) {
   const backgroundColor = useThemeColor({}, 'tint');
   const textColor = useThemeColor({}, 'background');
   const borderColor = useThemeColor({}, 'border');

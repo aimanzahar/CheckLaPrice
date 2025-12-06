@@ -1,65 +1,146 @@
-import React, { useState } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Share,
-  Alert,
-} from 'react-native';
-import { useLocalSearchParams, router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { Text as ThemedText, View as ThemedView } from '@/components/Themed';
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
-import { Button } from '@/components/ui/Button';
 import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import { Ionicons } from '@expo/vector-icons';
+import { router, useLocalSearchParams } from 'expo-router';
+import React from 'react';
+import {
+  Alert,
+  ScrollView,
+  Share,
+  StyleSheet,
+  View,
+} from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeInDown,
+  FadeInUp,
+  SlideInUp,
+  ZoomIn,
+} from 'react-native-reanimated';
 
-// Mock product data
-const mockProduct = {
-  id: '1',
-  name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
-  currentPrice: 279.99,
-  originalPrice: 349.99,
-  image: 'https://via.placeholder.com/300',
-  store: 'Amazon',
-  description: 'Industry-leading noise canceling with Dual Noise Sensor technology. Next-level music with Edge-AI and DSEE Extreme. Crystal-clear hands-free calling with precise voice pickup.',
-  url: 'https://www.amazon.com/dp/B0863TXGM3',
-  priceHistory: [
-    { date: '2024-01-01', price: 349.99 },
-    { date: '2024-01-02', price: 329.99 },
-    { date: '2024-01-03', price: 319.99 },
-    { date: '2024-01-04', price: 299.99 },
-    { date: '2024-01-05', price: 289.99 },
-    { date: '2024-01-06', price: 279.99 },
-    { date: '2024-01-07', price: 279.99 },
-  ],
-  specifications: {
-    'Brand': 'Sony',
-    'Model': 'WH-1000XM4',
-    'Color': 'Black',
-    'Connectivity': 'Bluetooth 5.0',
-    'Battery Life': '30 hours',
-    'Weight': '254g',
+// Sample products for demo
+const sampleProducts: Record<string, any> = {
+  '1': {
+    id: '1',
+    name: 'Sony WH-1000XM4 Wireless Noise-Canceling Headphones',
+    currentPrice: 279.99,
+    originalPrice: 349.99,
+    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=300',
+    store: 'Amazon',
+    description: 'Industry-leading noise canceling with Dual Noise Sensor technology. Next-level music with Edge-AI and DSEE Extreme. Crystal-clear hands-free calling with precise voice pickup.',
+    url: 'https://www.amazon.com/dp/B0863TXGM3',
+    priceChange: -15.50,
+    trend: 'down',
+    lastUpdated: '2 hours ago',
+    targetPrice: 250,
+    priceHistory: [
+      { date: '2024-01-01', price: 349.99 },
+      { date: '2024-01-02', price: 329.99 },
+      { date: '2024-01-03', price: 319.99 },
+      { date: '2024-01-04', price: 299.99 },
+      { date: '2024-01-05', price: 289.99 },
+      { date: '2024-01-06', price: 279.99 },
+      { date: '2024-01-07', price: 279.99 },
+    ],
+  },
+  '2': {
+    id: '2',
+    name: 'Apple iPad Air (5th Generation)',
+    currentPrice: 599.00,
+    originalPrice: 599.00,
+    image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=300',
+    store: 'Best Buy',
+    description: '10.9-inch Liquid Retina display with True Tone. Apple M1 chip with Neural Engine for next-level performance.',
+    priceChange: 0,
+    trend: 'stable',
+    lastUpdated: '1 hour ago',
+    priceHistory: [
+      { date: '2024-01-01', price: 599.00 },
+      { date: '2024-01-07', price: 599.00 },
+    ],
+  },
+  '3': {
+    id: '3',
+    name: 'Samsung 65-inch 4K Smart TV',
+    currentPrice: 899.99,
+    originalPrice: 1099.99,
+    image: 'https://images.unsplash.com/photo-1593359677879-a4bb92f829d1?w=300',
+    store: 'Target',
+    description: 'Crystal UHD 4K Smart TV with HDR. Built-in Alexa and smart home control. AirSlim design.',
+    priceChange: 25.00,
+    trend: 'up',
+    lastUpdated: '3 hours ago',
+    targetPrice: 800,
+    priceHistory: [
+      { date: '2024-01-01', price: 849.99 },
+      { date: '2024-01-04', price: 874.99 },
+      { date: '2024-01-07', price: 899.99 },
+    ],
+  },
+  '4': {
+    id: '4',
+    name: 'Nintendo Switch OLED Model',
+    currentPrice: 349.99,
+    originalPrice: 349.99,
+    image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?w=300',
+    store: 'Walmart',
+    description: '7-inch OLED screen with vibrant colors. Enhanced audio and 64 GB internal storage.',
+    priceChange: -10.00,
+    trend: 'down',
+    lastUpdated: '5 hours ago',
+    priceHistory: [
+      { date: '2024-01-01', price: 359.99 },
+      { date: '2024-01-07', price: 349.99 },
+    ],
+  },
+  '5': {
+    id: '5',
+    name: 'Dyson V15 Detect Cordless Vacuum',
+    currentPrice: 649.99,
+    originalPrice: 749.99,
+    image: 'https://images.unsplash.com/photo-1558317374-067fb5f30001?w=300',
+    store: 'Amazon',
+    description: 'Laser reveals microscopic dust. Piezo sensor measures and counts dust particles.',
+    priceChange: -50.00,
+    trend: 'down',
+    lastUpdated: '30 minutes ago',
+    targetPrice: 600,
+    priceHistory: [
+      { date: '2024-01-01', price: 699.99 },
+      { date: '2024-01-04', price: 699.99 },
+      { date: '2024-01-07', price: 649.99 },
+    ],
   },
 };
 
 export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams();
-  const [product] = useState(mockProduct);
-  const [notifyEnabled, setNotifyEnabled] = useState(true);
+  const { id } = useLocalSearchParams<{ id: string }>();
+  const product = sampleProducts[id || '1'];
 
-  const textColor = useThemeColor({}, 'text');
   const tintColor = useThemeColor({}, 'tint');
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
 
+  if (!product) {
+    return (
+      <ThemedView style={[styles.container, styles.loadingContainer]}>
+        <Ionicons name="alert-circle-outline" size={64} color={borderColor} />
+        <ThemedText style={styles.notFoundText}>Product not found</ThemedText>
+        <Button title="Go Back" onPress={() => router.back()} variant="outline" />
+      </ThemedView>
+    );
+  }
+
+  const priceHistory = product.priceHistory || [];
   const priceData = {
-    labels: product.priceHistory.map(item => {
+    labels: priceHistory.slice(-7).map((item: any) => {
       const date = new Date(item.date);
       return date.toLocaleDateString('en', { weekday: 'short' });
     }),
     datasets: [{
-      data: product.priceHistory.map(item => item.price),
+      data: priceHistory.slice(-7).map((item: any) => item.price),
       color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
       strokeWidth: 2,
     }],
@@ -69,7 +150,7 @@ export default function ProductDetailScreen() {
     try {
       await Share.share({
         message: `Check out this deal: ${product.name} is now $${product.currentPrice} at ${product.store}`,
-        url: product.url,
+        url: product.url || '',
       });
     } catch (error) {
       Alert.alert('Error', 'Failed to share product');
@@ -77,7 +158,6 @@ export default function ProductDetailScreen() {
   };
 
   const handleVisitStore = () => {
-    // TODO: Open product URL in browser
     Alert.alert('Opening Store', `This would open ${product.store} in your browser`);
   };
 
@@ -111,110 +191,134 @@ export default function ProductDetailScreen() {
     ? Math.round(((product.originalPrice - product.currentPrice) / product.originalPrice) * 100)
     : 0;
 
+  const lowestPrice = priceHistory.length > 0
+    ? Math.min(...priceHistory.map((p: any) => p.price))
+    : product.currentPrice;
+  const highestPrice = priceHistory.length > 0
+    ? Math.max(...priceHistory.map((p: any) => p.price))
+    : product.currentPrice;
+  const averagePrice = priceHistory.length > 0
+    ? priceHistory.reduce((sum: number, p: any) => sum + p.price, 0) / priceHistory.length
+    : product.currentPrice;
+
   return (
     <ThemedView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        <Card style={styles.imageCard}>
-          <View style={styles.imagePlaceholder}>
-            <Ionicons name="image" size={64} color={borderColor} />
-          </View>
-          {discountPercentage > 0 && (
-            <View style={styles.discountBadge}>
-              <ThemedText style={styles.discountText}>-{discountPercentage}%</ThemedText>
+        <Animated.View entering={ZoomIn.delay(100).duration(400)}>
+          <Card style={styles.imageCard} delay={0}>
+            <View style={styles.imagePlaceholder}>
+              <Ionicons name="image" size={64} color={borderColor} />
             </View>
-          )}
-        </Card>
+            {discountPercentage > 0 && (
+              <Animated.View
+                entering={FadeIn.delay(400).duration(300)}
+                style={styles.discountBadge}
+              >
+                <ThemedText style={styles.discountText}>-{discountPercentage}%</ThemedText>
+              </Animated.View>
+            )}
+          </Card>
+        </Animated.View>
 
         <View style={styles.header}>
           <View style={styles.titleRow}>
-            <ThemedText style={styles.title}>{product.name}</ThemedText>
-            <Button
-              title=""
-              icon={<Ionicons name="share-outline" size={24} color={tintColor} />}
-              onPress={handleShare}
-              variant="ghost"
-            />
+            <Animated.View entering={FadeInDown.delay(200).duration(400)} style={{ flex: 1 }}>
+              <ThemedText style={styles.title}>{product.name}</ThemedText>
+            </Animated.View>
+            <Animated.View entering={FadeIn.delay(300)}>
+              <Button
+                title=""
+                icon={<Ionicons name="share-outline" size={24} color={tintColor} />}
+                onPress={handleShare}
+                variant="ghost"
+              />
+            </Animated.View>
           </View>
 
-          <View style={styles.priceRow}>
-            <ThemedText style={styles.currentPrice}>${product.currentPrice}</ThemedText>
-            {product.originalPrice && (
+          <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.priceRow}>
+            <ThemedText style={styles.currentPrice}>${product.currentPrice.toFixed(2)}</ThemedText>
+            {product.originalPrice && product.originalPrice > product.currentPrice && (
               <ThemedText style={styles.originalPrice}>
-                ${product.originalPrice}
+                ${product.originalPrice.toFixed(2)}
               </ThemedText>
             )}
-          </View>
+          </Animated.View>
 
-          <View style={styles.metaRow}>
+          <Animated.View entering={FadeIn.delay(400)} style={styles.metaRow}>
             <View style={styles.metaItem}>
               <Ionicons name="storefront-outline" size={20} color={tintColor} />
               <ThemedText style={styles.metaText}>{product.store}</ThemedText>
             </View>
             <View style={styles.metaItem}>
               <Ionicons name="time-outline" size={20} color={tintColor} />
-              <ThemedText style={styles.metaText}>Updated 2h ago</ThemedText>
+              <ThemedText style={styles.metaText}>{product.lastUpdated}</ThemedText>
             </View>
-          </View>
+          </Animated.View>
+
+          {product.targetPrice && (
+            <Animated.View entering={FadeIn.delay(450)} style={styles.targetPriceRow}>
+              <Ionicons name="notifications" size={18} color={tintColor} />
+              <ThemedText style={styles.targetPriceText}>
+                Alert set for ${product.targetPrice.toFixed(2)}
+              </ThemedText>
+            </Animated.View>
+          )}
         </View>
 
-        <Card style={styles.chartCard}>
-          <ThemedText style={styles.sectionTitle}>Price History</ThemedText>
-          <PriceChart data={priceData} height={200} showDots={true} />
-          <View style={styles.statsRow}>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statLabel}>Lowest</ThemedText>
-              <ThemedText style={styles.statValue}>
-                ${Math.min(...product.priceHistory.map(p => p.price)).toFixed(2)}
-              </ThemedText>
+        {priceHistory.length > 1 && (
+          <Card style={styles.chartCard} delay={250}>
+            <ThemedText style={styles.sectionTitle}>Price History</ThemedText>
+            <Animated.View entering={FadeIn.delay(450).duration(500)}>
+              <PriceChart data={priceData} height={200} showDots={true} />
+            </Animated.View>
+            <View style={styles.statsRow}>
+              <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
+                <ThemedText style={styles.statLabel}>Lowest</ThemedText>
+                <ThemedText style={styles.statValue}>${lowestPrice.toFixed(2)}</ThemedText>
+              </Animated.View>
+              <Animated.View entering={FadeInUp.delay(600)} style={styles.stat}>
+                <ThemedText style={styles.statLabel}>Highest</ThemedText>
+                <ThemedText style={styles.statValue}>${highestPrice.toFixed(2)}</ThemedText>
+              </Animated.View>
+              <Animated.View entering={FadeInUp.delay(700)} style={styles.stat}>
+                <ThemedText style={styles.statLabel}>Average</ThemedText>
+                <ThemedText style={styles.statValue}>${averagePrice.toFixed(2)}</ThemedText>
+              </Animated.View>
             </View>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statLabel}>Highest</ThemedText>
-              <ThemedText style={styles.statValue}>
-                ${Math.max(...product.priceHistory.map(p => p.price)).toFixed(2)}
-              </ThemedText>
-            </View>
-            <View style={styles.stat}>
-              <ThemedText style={styles.statLabel}>Average</ThemedText>
-              <ThemedText style={styles.statValue}>
-                ${(product.priceHistory.reduce((sum, p) => sum + p.price, 0) / product.priceHistory.length).toFixed(2)}
-              </ThemedText>
-            </View>
-          </View>
-        </Card>
+          </Card>
+        )}
 
-        <Card style={styles.descriptionCard}>
-          <ThemedText style={styles.sectionTitle}>Description</ThemedText>
-          <ThemedText style={styles.description}>{product.description}</ThemedText>
-        </Card>
-
-        <Card style={styles.specsCard}>
-          <ThemedText style={styles.sectionTitle}>Specifications</ThemedText>
-          {Object.entries(product.specifications).map(([key, value]) => (
-            <View key={key} style={[styles.specRow, { borderBottomColor: borderColor }]}>
-              <ThemedText style={styles.specLabel}>{key}</ThemedText>
-              <ThemedText style={styles.specValue}>{value}</ThemedText>
-            </View>
-          ))}
-        </Card>
+        {product.description && (
+          <Card style={styles.descriptionCard} delay={350}>
+            <ThemedText style={styles.sectionTitle}>Description</ThemedText>
+            <ThemedText style={styles.description}>{product.description}</ThemedText>
+          </Card>
+        )}
 
         <View style={styles.actions}>
-          <Button
-            title="Visit Store"
-            onPress={handleVisitStore}
-            style={styles.actionButton}
-          />
-          <Button
-            title="Set Alert"
-            onPress={handleSetAlert}
-            variant="outline"
-            style={styles.actionButton}
-          />
-          <Button
-            title="Remove"
-            onPress={handleRemoveFromWishlist}
-            variant="ghost"
-            textStyle={{ color: '#FF3B30' }}
-          />
+          <Animated.View entering={SlideInUp.delay(600).springify()}>
+            <Button
+              title="Visit Store"
+              onPress={handleVisitStore}
+              style={styles.actionButton}
+            />
+          </Animated.View>
+          <Animated.View entering={SlideInUp.delay(700).springify()}>
+            <Button
+              title="Set Price Alert"
+              onPress={handleSetAlert}
+              variant="outline"
+              style={styles.actionButton}
+            />
+          </Animated.View>
+          <Animated.View entering={FadeIn.delay(800)}>
+            <Button
+              title="Remove from Wishlist"
+              onPress={handleRemoveFromWishlist}
+              variant="ghost"
+              textStyle={{ color: '#FF3B30' }}
+            />
+          </Animated.View>
         </View>
 
         <View style={styles.bottomSpacer} />
@@ -229,6 +333,16 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: SIZES.md,
+  },
+  notFoundText: {
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: SIZES.md,
   },
   imageCard: {
     margin: SIZES.md,
@@ -301,6 +415,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     opacity: 0.8,
   },
+  targetPriceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SIZES.xs,
+    marginTop: SIZES.md,
+    padding: SIZES.sm,
+    backgroundColor: 'rgba(0, 122, 255, 0.1)',
+    borderRadius: 8,
+  },
+  targetPriceText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#007AFF',
+  },
   chartCard: {
     margin: SIZES.md,
   },
@@ -336,24 +464,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     opacity: 0.9,
-  },
-  specsCard: {
-    margin: SIZES.md,
-  },
-  specRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: SIZES.sm,
-    borderBottomWidth: 1,
-  },
-  specLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    opacity: 0.7,
-  },
-  specValue: {
-    fontSize: 14,
-    fontWeight: '500',
   },
   actions: {
     padding: SIZES.md,

@@ -1,17 +1,21 @@
-import React, { useState } from 'react';
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Switch,
-} from 'react-native';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text as ThemedText, View as ThemedView, useThemeColor } from '@/components/Themed';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { PriceChart } from '@/components/ui/PriceChart';
-import { Button } from '@/components/ui/Button';
 import { SIZES } from '@/utils/constants';
-import { useThemeColor } from '@/components/Themed';
+import React, { useState } from 'react';
+import {
+    ScrollView,
+    StyleSheet,
+    Switch,
+    View,
+} from 'react-native';
+import Animated, {
+    FadeIn,
+    FadeInDown,
+    FadeInUp,
+    SlideInRight,
+} from 'react-native-reanimated';
 
 // Mock data for price history
 const generateMockPriceData = () => ({
@@ -69,34 +73,40 @@ export default function AnalysisScreen() {
     <ThemedView style={styles.container}>
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <ThemedText style={styles.title}>Price Analysis</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Sony WH-1000XM4 Wireless Headphones
-          </ThemedText>
+          <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+            <ThemedText style={styles.title}>Price Analysis</ThemedText>
+          </Animated.View>
+          <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+            <ThemedText style={styles.subtitle}>
+              Sony WH-1000XM4 Wireless Headphones
+            </ThemedText>
+          </Animated.View>
         </View>
 
         {/* Price Chart */}
-        <Card style={styles.chartCard}>
+        <Card style={styles.chartCard} delay={150}>
           <ThemedText style={styles.sectionTitle}>7-Day Price Trend</ThemedText>
-          <PriceChart data={priceData} height={250} />
+          <Animated.View entering={FadeIn.delay(300).duration(500)}>
+            <PriceChart data={priceData} height={250} />
+          </Animated.View>
           <View style={styles.priceStats}>
-            <View style={styles.stat}>
+            <Animated.View entering={FadeInUp.delay(400)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Average</ThemedText>
               <ThemedText style={styles.statValue}>$284.99</ThemedText>
-            </View>
-            <View style={styles.stat}>
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(500)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Volatility</ThemedText>
               <ThemedText style={styles.statValue}>Low</ThemedText>
-            </View>
-            <View style={styles.stat}>
+            </Animated.View>
+            <Animated.View entering={FadeInUp.delay(600)} style={styles.stat}>
               <ThemedText style={styles.statLabel}>Prediction</ThemedText>
               <ThemedText style={[styles.statValue, { color: '#34C759' }]}>↓ Drop</ThemedText>
-            </View>
+            </Animated.View>
           </View>
         </Card>
 
         {/* Price Alerts */}
-        <Card style={styles.alertCard}>
+        <Card style={styles.alertCard} delay={250}>
           <ThemedText style={styles.sectionTitle}>Price Alerts</ThemedText>
           <View style={styles.alertRow}>
             <View style={styles.alertInfo}>
@@ -123,10 +133,14 @@ export default function AnalysisScreen() {
         </Card>
 
         {/* News & Trends */}
-        <Card style={styles.newsCard}>
+        <Card style={styles.newsCard} delay={350}>
           <ThemedText style={styles.sectionTitle}>Market News & Trends</ThemedText>
-          {newsData.map(item => (
-            <View key={item.id} style={[styles.newsItem, { borderBottomColor: borderColor }]}>
+          {newsData.map((item, index) => (
+            <Animated.View
+              key={item.id}
+              entering={SlideInRight.delay(400 + index * 100).springify()}
+              style={[styles.newsItem, { borderBottomColor: borderColor }]}
+            >
               <View style={styles.newsHeader}>
                 <ThemedText style={styles.newsSource}>{item.source}</ThemedText>
                 {renderSentimentBadge(item.sentiment)}
@@ -136,14 +150,14 @@ export default function AnalysisScreen() {
                 <ThemedText style={styles.newsTime}>{item.time}</ThemedText>
                 <ThemedText style={styles.newsImpact}>{item.impact}</ThemedText>
               </View>
-            </View>
+            </Animated.View>
           ))}
         </Card>
 
         {/* Recommendations */}
-        <Card style={styles.recommendationCard}>
+        <Card style={styles.recommendationCard} delay={450}>
           <ThemedText style={styles.sectionTitle}>AI Recommendation</ThemedText>
-          <View style={styles.recommendation}>
+          <Animated.View entering={FadeIn.delay(550)} style={styles.recommendation}>
             <View style={styles.recommendationIcon}>
               <ThemedText style={styles.recommendationEmoji}>💡</ThemedText>
             </View>
@@ -156,12 +170,14 @@ export default function AnalysisScreen() {
                 expect a 10-15% drop during upcoming sales events.
               </ThemedText>
             </View>
-          </View>
-          <Button
-            title="Set Price Alert"
-            onPress={() => {}}
-            style={styles.alertButton}
-          />
+          </Animated.View>
+          <Animated.View entering={FadeInUp.delay(650).springify()}>
+            <Button
+              title="Set Price Alert"
+              onPress={() => {}}
+              style={styles.alertButton}
+            />
+          </Animated.View>
         </Card>
       </ScrollView>
     </ThemedView>
