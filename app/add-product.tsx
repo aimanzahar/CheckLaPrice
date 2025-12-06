@@ -53,7 +53,7 @@ export default function AddProductScreen() {
   const borderColor = useThemeColor({ light: '#e0e0e0', dark: '#333333' }, 'border');
   const cardBgColor = useThemeColor({ light: '#ffffff', dark: '#1a1a1a' }, 'background');
 
-  const handleSearchLazada = async () => {
+  const handleSearchProducts = async () => {
     if (!searchQuery.trim()) {
       Alert.alert('Error', 'Please enter a search term');
       return;
@@ -67,7 +67,7 @@ export default function AddProductScreen() {
     });
     
     try {
-      const response = await apiService.scrapeLazada(searchQuery.trim());
+      const response = await apiService.scrapeAll(searchQuery.trim());
       console.log('[AddProduct] Search response', {
         success: response.success,
         count: response.data?.length ?? 0,
@@ -140,7 +140,7 @@ export default function AddProductScreen() {
         currentPrice: price,
         originalPrice: selectedProduct.originalPrice || price,
         image: selectedProduct.image || 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300',
-        store: 'Lazada',
+        store: selectedProduct.store || 'Lazada',
         url: selectedProduct.url || undefined,
         targetPrice: targetPrice ? parseFloat(targetPrice) : undefined,
       });
@@ -169,11 +169,11 @@ export default function AddProductScreen() {
       exiting={FadeOut.duration(200)}
     >
       <Animated.View entering={FadeInDown.delay(100).duration(400)}>
-        <ThemedText style={styles.title}>Search Lazada</ThemedText>
+        <ThemedText style={styles.title}>Search Lazada & Shopee</ThemedText>
       </Animated.View>
       <Animated.View entering={FadeInDown.delay(200).duration(400)}>
         <ThemedText style={styles.subtitle}>
-          Enter a product name to search on Lazada
+          Enter a product name to search across both stores
         </ThemedText>
       </Animated.View>
 
@@ -199,8 +199,8 @@ export default function AddProductScreen() {
 
       <Animated.View entering={FadeInUp.delay(400).springify()}>
         <Button
-          title={loading ? 'Searching...' : 'Search Lazada'}
-          onPress={handleSearchLazada}
+          title={loading ? 'Searching...' : 'Search Lazada + Shopee'}
+          onPress={handleSearchProducts}
           loading={loading}
           style={styles.searchButton}
           icon={!loading ? <Ionicons name="search" size={20} color="#fff" /> : undefined}
@@ -212,7 +212,7 @@ export default function AddProductScreen() {
           <View style={styles.tip}>
             <Ionicons name="information-circle" size={20} color={tintColor} />
             <ThemedText style={styles.tipText}>
-              Enter keywords like product names, brands, or categories to find products on Lazada Malaysia
+              We search Lazada and Shopee together and sort results by lowest price. Try brand, model, or category keywords.
             </ThemedText>
           </View>
         </Card>
@@ -237,7 +237,7 @@ export default function AddProductScreen() {
 
       <Animated.View entering={FadeInDown.delay(200).duration(400)}>
         <ThemedText style={styles.subtitle}>
-          Found {scrapedProducts.length} products for "{searchQuery}"
+          Found {scrapedProducts.length} products for "{searchQuery}" (Lazada & Shopee, sorted by price)
         </ThemedText>
       </Animated.View>
 
@@ -277,6 +277,10 @@ export default function AddProductScreen() {
                     <ThemedText style={styles.productPrice}>
                       {formatPrice(product.price)}
                     </ThemedText>
+                    <View style={styles.storeBadge}>
+                      <Ionicons name="storefront-outline" size={12} color={tintColor} />
+                      <ThemedText style={styles.storeBadgeText}>{product.store}</ThemedText>
+                    </View>
                     {product.discount && (
                       <View style={styles.discountBadge}>
                         <ThemedText style={styles.discountText}>{product.discount}</ThemedText>
@@ -340,7 +344,7 @@ export default function AddProductScreen() {
                 </ThemedText>
                 <View style={styles.storeTag}>
                   <Ionicons name="storefront-outline" size={12} color={tintColor} />
-                  <ThemedText style={styles.storeText}>Lazada</ThemedText>
+                    <ThemedText style={styles.storeText}>{selectedProduct.store || 'Lazada'}</ThemedText>
                 </View>
               </View>
             </View>
@@ -522,6 +526,22 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#f97316',
     marginBottom: SIZES.xs,
+  },
+  storeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eff6ff',
+    paddingHorizontal: SIZES.xs,
+    paddingVertical: 2,
+    borderRadius: 6,
+    alignSelf: 'flex-start',
+    marginBottom: SIZES.xs,
+    gap: 4,
+  },
+  storeBadgeText: {
+    fontSize: 11,
+    color: '#2563eb',
+    fontWeight: '600',
   },
   discountBadge: {
     backgroundColor: '#fef3c7',

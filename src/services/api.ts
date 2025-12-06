@@ -1,5 +1,5 @@
-import { ApiResponse } from '@/types';
 import { NativeModules, Platform } from 'react-native';
+import { ApiResponse } from '../types';
 
 const debugLog = (...args: unknown[]) => {
   if (__DEV__) {
@@ -181,9 +181,9 @@ class ApiService {
    * @param query - Search term to find products
    * @returns ScrapeResponse with array of scraped products or error
    */
-  async scrapeLazada(query: string): Promise<ScrapeResponse> {
+  private async scrape(endpoint: string, query: string): Promise<ScrapeResponse> {
     try {
-      const url = `${API_BASE_URL}/api/scrape/lazada`;
+      const url = `${API_BASE_URL}${endpoint}`;
       debugLog('scrape:start', { url, query });
 
       const { cleanup, ...opts } = this.withTimeout(
@@ -197,7 +197,7 @@ class ApiService {
             type: 'search',
           }),
         },
-        60000
+        150000
       );
 
       const response = await fetch(url, {
@@ -237,6 +237,14 @@ class ApiService {
         error: error instanceof Error ? error.message : 'Network error occurred',
       };
     }
+  }
+
+  async scrapeLazada(query: string): Promise<ScrapeResponse> {
+    return this.scrape('/api/scrape/lazada', query);
+  }
+
+  async scrapeAll(query: string): Promise<ScrapeResponse> {
+    return this.scrape('/api/scrape/all', query);
   }
 }
 

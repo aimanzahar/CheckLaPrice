@@ -1,6 +1,6 @@
 import { ApifyClient } from 'apify-client';
-import fs from 'fs';
 import dotenv from 'dotenv';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -9,13 +9,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
-// Initialize the ApifyClient with your API token
-const client = new ApifyClient({
-    token: process.env.API_TOKEN,
-});
+const token = process.env.API_TOKEN;
+if (!token) {
+    console.error("API_TOKEN is missing. Please set it in your .env file.");
+    process.exit(1);
+}
 
-// ✅ YOUR FULL, VALID COOKIES (Pasted automatically)
-const cookies = [
+const keyword = process.argv[2] || process.env.SHOPEE_KEYWORD;
+if (!keyword) {
+    console.error("Usage: node scrapy.js \"<search keyword>\" [maxProducts]");
+    process.exit(1);
+}
+
+const maxProductsArg = Number(process.argv[3]);
+const maxProducts = Number.isFinite(maxProductsArg) ? maxProductsArg : 50;
+
+// Initialize the ApifyClient with your API token
+const client = new ApifyClient({ token });
+
+// Default cookies remain as fallback; override with env SHOPEE_COOKIES if provided
+const DEFAULT_COOKIES = [
     {
         "name": "_ga",
         "value": "GA1.1.132238722.1741167614",
@@ -156,25 +169,32 @@ const cookies = [
     }
 ];
 
+const envCookies = process.env.SHOPEE_COOKIES;
+let cookies = DEFAULT_COOKIES;
+if (envCookies) {
+    try {
+        cookies = JSON.parse(envCookies);
+    } catch (err) {
+        console.warn("SHOPEE_COOKIES is not valid JSON. Using default cookies.");
+    }
+}
+
 const input = {
-    // Convert the cookie object array to a JSON string for Apify
-    "shopeeCookies": JSON.stringify(cookies),
-    "searchKeywords": ["iphone 15 casing"],
-    "country": "MY",
-    "scrapeMode": "fast",
-    "maxProductsPerSearch": 50,
-    "sortBy": "sales",
-    
-    // ✅ PROXY: This is critical for Shopee Malaysia
-    "proxyConfiguration": {
-        "useApifyProxy": true,
-        "apifyProxyGroups": ["RESIDENTIAL"],
-        "apifyProxyCountry": "MY" 
+    shopeeCookies: JSON.stringify(cookies),
+    searchKeywords: [keyword],
+    country: process.env.SHOPEE_COUNTRY || "MY",
+    scrapeMode: process.env.SHOPEE_SCRAPE_MODE || "fast",
+    maxProductsPerSearch: maxProducts,
+    sortBy: process.env.SHOPEE_SORT_BY || "relevancy",
+    proxyConfiguration: {
+        useApifyProxy: true,
+        apifyProxyGroups: ["RESIDENTIAL"],
+        apifyProxyCountry: process.env.SHOPEE_PROXY_COUNTRY || "MY"
     }
 };
 
 (async () => {
-    console.log("Starting Shopee Scraper...");
+    console.log(`Starting Shopee Scraper for "${keyword}"...`);
     try {
         const run = await client.actor("fatihtahta/shopee-scraper").call(input);
         console.log(`Scraper finished. Run ID: ${run.id}`);
@@ -182,13 +202,25 @@ const input = {
         const { items } = await client.dataset(run.defaultDatasetId).listItems();
         
         if (items.length > 0) {
+            const normalized = items.map(item => ({
+                name: item.name,
+                price: item.price ? (item.price / 100) : 0,
+                image: item.imageUrl,
+                store: "Shopee",
+                url: item.url,
+                discount: item.discountPercentage ? `${item.discountPercentage}%` : null,
+                ratings: item.rating ?? null,
+                reviews: item.salesCount ?? null,
+            }));
+
             // Generate a unique filename using timestamp
             const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
             const fileName = `shopee_full_data_${timestamp}.json`;
             
-            // Save the data to file
+            // Save the raw data and normalized data to file for debugging
             fs.writeFileSync(fileName, JSON.stringify(items, null, 2));
-            console.log(`\n✅ Success! Saved ${items.length} products to ${fileName}`);
+            fs.writeFileSync(`shopee_normalized_${timestamp}.json`, JSON.stringify(normalized, null, 2));
+            console.log(`✅ Saved ${items.length} products to ${fileName} and normalized output.`);
         } else {
             console.log("❌ No items found. If this persists, your residential proxy quota might be empty.");
         }
