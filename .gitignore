@@ -3,6 +3,12 @@
 # dependencies
 node_modules/
 
+#ignore all pycache folders
+**/__pycache__/
+
+#ignore venv folder
+venv/
+
 # Expo
 .expo/
 dist/

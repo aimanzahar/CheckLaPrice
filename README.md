@@ -5,7 +5,8 @@
   <h3>"Know the Price. Beat the Price."</h3>
 
   <p>
-    A smart price-tracking and trend-monitoring app that helps users make smarter buying decisions.
+    <strong>Price-Hike Aware Wishlist App</strong><br>
+    A web/mobile application that allows users to maintain a wishlist of items and automatically monitors world and local news to detect signals of potential price hikes. Users receive proactive alerts before price increases happen.
   </p>
 
   <p>
@@ -45,31 +46,46 @@ Non-tech users often struggle to know:
 
 ---
 
-## ⭐ Key Features
+## ⭐ Functional Specifications
 
-### 🔹 1. Wishlist Management (CRUD)
-- Add items via URL or manual input.
-- Auto-fetch thumbnail, price, and description.
-- Edit, delete, and reorder wishlist items.
-- *Coming Soon:* Local + cloud sync.
+### 🔹 1. Wishlist Management
+Users can maintain a personalized list of items to track.
+- **Add Items via:**
+  - Product URL
+  - Manual entry (name, brand, category, price range)
+  - Barcode/QR scan (optional)
+- **Management:** Edit, remove, tag/categorize, and reorder items.
+- **Data Stored:** Name, thumbnail, category, current price, price history, source URL, target price, and alert preferences (drop/hike).
 
 ### 🔹 2. Price Monitoring Engine
-- Scheduled price checks.
-- Supports marketplace/store APIs.
-- Web scraping fallback for unsupported sites.
-- Stores price history to detect spikes or drops.
+Automatically tracks price changes to detect trends.
+- **Monitoring Intervals:** Default 24 hours (configurable 1–48 hours) or event-triggered.
+- **Data Sources:** Web scrapers and Marketplace APIs (Shopee, Lazada, Amazon).
+- **Price Logs:** Timestamp, price, source, % change, and predicted trend (UP/DOWN/STABLE).
+- **Triggers:**
+  - Price increases above threshold.
+  - Price drops to target.
+  - Sudden price spikes.
+  - Imminent predicted price increase.
 
-### 🔹 3. News & Trend Intelligence
-- Scrapes product/brand news.
-- **Sentiment Analysis:** Classifies market mood (Positive / Neutral / Negative).
-- Uses international + local news APIs.
-- Correlates news activity with price movements.
+### 🔹 3. News & Event Monitoring Engine
+Scans global and local sources to predict market shifts.
+- **Sources:** Global/Local news, Industry feeds, Social media (X, Reddit), Government announcements, Economic reports.
+- **Processing Pipeline:**
+  - Aggregates news every X minutes.
+  - **NLP Classification:** Detects supply shortages, demand surges, geopolitical tensions, inflation, trade restrictions, etc.
+  - **Risk Scoring:** `RiskScore = (NewsSeverity * CategoryMappingWeight * RecencyFactor) - NoiseFilter`
+- **Action:** Alerts user if RiskScore exceeds threshold.
 
-### 🔹 4. Alerts & Notifications
-- **Triggers:** Price Drop, Price Hike, Trend/Market Warnings.
-- Includes short, readable summaries.
-- Push notifications via **Expo Notifications API**.
-- Optional email alerts.
+### 🔹 4. Alerting System
+Proactive notifications to keep users informed.
+- **Channels:** Push notifications, Email, In-app, Telegram/WhatsApp bot (optional).
+- **Alert Types:**
+  - 🚨 Price Hike Warning
+  - 📈 Price Increase Detected
+  - 📉 Price Drop Detected
+  - ⚠️ Critical Event Alert
+- **Payload:** Event summary, item affected, confidence level, and recommended action.
 
 ---
 
@@ -137,11 +153,11 @@ We chose **Expo Go** to enable rapid development and testing:
 ## 🗺️ Roadmap
 
 - [x] Project Setup & UI Shell
-- [ ] Wishlist CRUD Operations
-- [ ] Price Scraping Engine Integration
-- [ ] News Sentiment Analysis Model
-- [ ] Push Notification System
-- [ ] Cloud Sync & User Auth
+- [ ] **Wishlist Management:** URL scraping, Manual entry, Barcode scanning.
+- [ ] **Price Engine:** Scrapers for Shopee/Lazada, Price history logging.
+- [ ] **Intelligence:** News NLP pipeline, Risk Score algorithm, Social media signals.
+- [ ] **Alerts:** Push notifications, Email integration, Telegram bot.
+- [ ] **Advanced:** ML-based price prediction, Cloud Sync.
 
 ---
 
