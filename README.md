@@ -1,152 +1,154 @@
-# React Native Cross-Platform Template
+<div align="center">
 
-A template for building React Native apps that work on Web, iOS, and Android using Expo.
+  <h1>CheckLaPrice</h1>
+  
+  <h3>"Know the Price. Beat the Price."</h3>
 
-## Features
+  <p>
+    A smart price-tracking and trend-monitoring app that helps users make smarter buying decisions.
+  </p>
 
-- ✅ Expo Router for navigation
-- ✅ TypeScript support
-- ✅ Cross-platform compatibility (Web, iOS, Android)
-- ✅ Tab navigation
-- ✅ Modal support
-- ✅ Dark/Light theme support
-- ✅ Responsive design
+  <p>
+    <img src="https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native" />
+    <img src="https://img.shields.io/badge/Expo-1B1F23?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+    <img src="https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License" />
+  </p>
 
-## Getting Started
+  <p>
+    <a href="#-key-features">Features</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-system-architecture">Architecture</a> •
+    <a href="#-tech-stack">Tech Stack</a>
+  </p>
+</div>
+
+<br />
+
+## 📌 Problem Statement
+
+Non-tech users often struggle to know:
+- **Is this a good price or an overpriced one?**
+- **Will the price go up or down?**
+- **Are there market events that might affect prices?**
+
+**CheckLaPrice** automates all the research by tracking prices, analyzing news sentiment, and sending alerts to users so they can buy confidently.
+
+---
+
+## 📱 App Showcase
+
+| **Home & Wishlist** | **Price Analysis** | **Smart Alerts** |
+|:---:|:---:|:---:|
+| <img src="https://via.placeholder.com/250x500?text=Home+Screen" alt="Home Screen" width="200"/> | <img src="https://via.placeholder.com/250x500?text=Price+Graph" alt="Price Graph" width="200"/> | <img src="https://via.placeholder.com/250x500?text=Notifications" alt="Notifications" width="200"/> |
+| *Manage your wishlist items* | *View price history & trends* | *Get notified on price drops* |
+
+---
+
+## ⭐ Key Features
+
+### 🔹 1. Wishlist Management (CRUD)
+- Add items via URL or manual input.
+- Auto-fetch thumbnail, price, and description.
+- Edit, delete, and reorder wishlist items.
+- *Coming Soon:* Local + cloud sync.
+
+### 🔹 2. Price Monitoring Engine
+- Scheduled price checks.
+- Supports marketplace/store APIs.
+- Web scraping fallback for unsupported sites.
+- Stores price history to detect spikes or drops.
+
+### 🔹 3. News & Trend Intelligence
+- Scrapes product/brand news.
+- **Sentiment Analysis:** Classifies market mood (Positive / Neutral / Negative).
+- Uses international + local news APIs.
+- Correlates news activity with price movements.
+
+### 🔹 4. Alerts & Notifications
+- **Triggers:** Price Drop, Price Hike, Trend/Market Warnings.
+- Includes short, readable summaries.
+- Push notifications via **Expo Notifications API**.
+- Optional email alerts.
+
+---
+
+## 🛠️ Tech Stack
+
+### Mobile App
+- **Framework:** React Native (Expo)
+- **Routing:** Expo Router
+- **Notifications:** Expo Notifications
+- **Networking:** Axios / Fetch
+- **State Management:** Zustand / Redux Toolkit
+
+### Backend & Intelligence
+- **Server:** Node.js + Express OR Python FastAPI
+- **Workers:** Scheduled Cron Jobs / Cloud Functions
+- **ML Model:** Sentiment Analysis & Trend Scoring
+- **Database:** Firebase Firestore / Supabase / MongoDB Atlas
+
+### Integrations
+- Marketplace APIs
+- Google News API / NewsData.io
+- Web Scraping (Puppeteer/Cheerio/BeautifulSoup)
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
-
-- Node.js (v18 or higher)
-- npm or yarn
-- Expo Go app (for testing on mobile)
+- [Node.js](https://nodejs.org/) (v18+)
+- [Expo Go](https://expo.dev/client) app installed on your iOS/Android device.
 
 ### Installation
 
-1. Install dependencies:
-```bash
-npm install
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/aimanzahar/CheckLaPrice.git
+   cd CheckLaPrice
+   ```
 
-2. Start the development server:
-```bash
-npm start
-```
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-### Running on Different Platforms
+3. **Start the app**
+   ```bash
+   npx expo start
+   ```
 
-#### Web
-```bash
-npm run web
-```
-Opens the app in your default browser at http://localhost:8081
+4. **Run on Device**
+   - Scan the QR code with the **Expo Go** app (Android) or Camera app (iOS).
 
-#### iOS
-```bash
-npm run ios
-```
-Requires:
-- macOS
-- Xcode
-- iOS Simulator
+---
 
-Or use the Expo Go app on your iOS device:
-1. Install Expo Go from the App Store
-2. Scan the QR code from the terminal
+## 📱 Why Expo Go?
 
-#### Android
-```bash
-npm run android
-```
-Requires:
-- Android Studio
-- Android SDK
+We chose **Expo Go** to enable rapid development and testing:
+- **Build fast** without complex native setup (Xcode/Android Studio).
+- **Instant testing** on real devices.
+- Access to powerful APIs like **Notifications**, **SecureStore**, and **Background Tasks**.
+- **Quick deployment** capabilities for hackathons.
 
-Or use the Expo Go app on your Android device:
-1. Install Expo Go from the Play Store
-2. Scan the QR code from the terminal
+---
 
-## Project Structure
+## 🗺️ Roadmap
 
-```
-├── app/              # Expo Router pages and layouts
-│   ├── (tabs)/       # Tab navigation screens
-│   ├── _layout.tsx   # Root layout
-│   └── +html.tsx     # Web HTML entry point
-├── assets/           # Images, fonts, and icons
-├── components/       # Reusable UI components
-├── constants/        # App constants (colors, sizes, etc.)
-├── src/              # Additional source code
-│   ├── components/   # Custom components
-│   ├── screens/      # Screen components
-│   ├── services/     # API and data services
-│   ├── hooks/        # Custom React hooks
-│   ├── utils/        # Utility functions
-│   └── types/        # TypeScript type definitions
-├── app.json          # Expo configuration
-├── package.json      # Dependencies and scripts
-└── tsconfig.json     # TypeScript configuration
-```
+- [x] Project Setup & UI Shell
+- [ ] Wishlist CRUD Operations
+- [ ] Price Scraping Engine Integration
+- [ ] News Sentiment Analysis Model
+- [ ] Push Notification System
+- [ ] Cloud Sync & User Auth
 
-## Available Scripts
+---
 
-- `npm start` - Start Expo development server
-- `npm run android` - Run on Android
-- `npm run ios` - Run on iOS
-- `npm run web` - Run in web browser
+## 🤝 Contributing
 
-## Platform-Specific Considerations
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-### Web
-- Uses Metro bundler
-- Generates static files for production
-- Responsive design using flexbox
+## 📄 License
 
-### Mobile
-- Uses native navigation
-- Supports gestures and animations
-- Access to native device features
-
-## Adding New Screens
-
-1. Create a new file in `app/(tabs)/` for tab screens
-2. Create a new file in `app/` for standalone screens
-3. Export and configure the screen in the appropriate layout file
-
-## Using Platform-Specific Code
-
-```typescript
-import { Platform } from 'react-native';
-
-const styles = {
-  container: {
-    padding: Platform.OS === 'web' ? 20 : 10,
-  },
-};
-```
-
-## Build for Production
-
-### Web
-```bash
-npx expo export -p web
-```
-
-### Mobile
-```bash
-npx expo build:android
-npx expo build:ios
-```
-
-## Learn More
-
-- [Expo Documentation](https://docs.expo.dev/)
-- [React Native Documentation](https://reactnative.dev/)
-- [Expo Router Documentation](https://docs.expo.dev/router/)
-
-## Contributing
-
-Feel free to submit issues and enhancement requests!
-
-## License
-
-MIT License
+This project is licensed under the MIT License.
