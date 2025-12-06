@@ -1,0 +1,14 @@
+# API Configuration
+EXPO_PUBLIC_API_URL=https://api.example.com
+
+# Feature Flags
+EXPO_PUBLIC_ENABLE_ANALYTICS=false
+EXPO_PUBLIC_ENABLE_CRASH_REPORTING=false
+
+# Development Settings
+EXPO_PUBLIC_DEV_MODE=true
+EXPO_PUBLIC_DEBUG_MODE=false
+
+# Convex Configuration (Self-hosted)
+EXPO_PUBLIC_CONVEX_URL=https://convex.zahar.my
+CONVEX_ADMIN_KEY=convex-self-hosted|01aa37dca8761f218e328bb57efe735dbf5d738bd7cf93f859ab99b3bcb2afb9f9ee57adf0
